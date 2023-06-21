@@ -13,32 +13,23 @@
 namespace eosio {
    namespace internal_use_do_not_use {
       extern "C" {
-         __attribute__((eosio_wasm_import))
-         void send_deferred(const uint128_t&, uint64_t, const char*, size_t, uint32_t);
+         __attribute__((import_name("send_deferred"))) void send_deferred(const uint128_t&, uint64_t, const char*, size_t, uint32_t);
 
-         __attribute__((eosio_wasm_import))
-         int cancel_deferred(const uint128_t&);
+         __attribute__((import_name("cancel_deferred"))) int cancel_deferred(const uint128_t&);
 
-         __attribute__((eosio_wasm_import))
-         size_t read_transaction(char*, size_t);
+         __attribute__((import_name("read_transaction"))) size_t read_transaction(char*, size_t);
 
-         __attribute__((eosio_wasm_import))
-         size_t transaction_size();
+         __attribute__((import_name("transaction_size"))) size_t transaction_size();
 
-         __attribute__((eosio_wasm_import))
-         int tapos_block_num();
+         __attribute__((import_name("tapos_block_num"))) int tapos_block_num();
 
-         __attribute__((eosio_wasm_import))
-         int tapos_block_prefix();
+         __attribute__((import_name("tapos_block_prefix"))) int tapos_block_prefix();
 
-         __attribute__((eosio_wasm_import))
-         uint32_t expiration();
+         __attribute__((import_name("expiration"))) uint32_t expiration();
 
-         __attribute__((eosio_wasm_import))
-         int get_action( uint32_t, uint32_t, char*, size_t);
+         __attribute__((import_name("get_action"))) int get_action( uint32_t, uint32_t, char*, size_t);
 
-         __attribute__((eosio_wasm_import))
-         int get_context_free_data( uint32_t, char*, size_t);
+         __attribute__((import_name("get_context_free_data"))) int get_context_free_data( uint32_t, char*, size_t);
       }
    }
 
@@ -188,10 +179,11 @@ namespace eosio {
       int s = internal_use_do_not_use::get_action( type, index, nullptr, 0 );
       eosio::check( s > 0, "get_action size failed" );
       size_t size = static_cast<size_t>(s);
-      char* buffer = (char*)( max_stack_buffer_size < size ? malloc(size) : alloca(size) );
-      auto size2 = internal_use_do_not_use::get_action( type, index, buffer, size );
+      auto free_memory = [size](char* buf) { if (max_stack_buffer_size < size) free(buf);};
+      std::unique_ptr<char, decltype(free_memory)> buffer( (char*)(max_stack_buffer_size < size ? malloc(size) : alloca(size)), free_memory);
+      auto size2 = internal_use_do_not_use::get_action( type, index, buffer.get(), size );
       eosio::check( size == static_cast<size_t>(size2), "get_action failed" );
-      return eosio::unpack<eosio::action>( buffer, size );
+      return eosio::unpack<eosio::action>( buffer.get(), size );
    }
 
    /**

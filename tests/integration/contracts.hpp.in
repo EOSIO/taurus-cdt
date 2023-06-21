@@ -3,30 +3,42 @@
 namespace eosio { namespace testing {
 
 struct contracts {
-   static const char* boot_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/boot.wasm"; }
-   static const char* malloc_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/malloc_tests.wasm"; }
-   static const char* old_malloc_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/old_malloc_tests.wasm"; }
+   static const char* boot_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/boot.wasm"; }
+   static const char* malloc_tests_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/malloc_tests.wasm"; }
 
-   static const char* simple_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/simple_tests.wasm"; }
+   static const char* simple_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/simple_tests.wasm"; }
 
-   static const char* transfer_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/transfer_contract.wasm"; }
+   static const char* transfer_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/transfer_contract.wasm"; }
 
-   static const char* capi_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/capi_tests.wasm"; }
+   static const char* capi_tests_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/capi_tests.wasm"; }
 
-   static const char* kv_single_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_single_index_tests.wasm"; }
-   static const char* kv_multi_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_multiple_indices_tests.wasm"; }
-   static const char* kv_multi_tests_abi() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_multiple_indices_tests.abi"; }
-   static const char* kv_make_key_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_make_key_tests.wasm"; }
-   static const char* kv_make_key_tests_abi() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_make_key_tests.abi"; }
-   static const char* kv_variant_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_variant_tests.wasm"; }
-   static const char* kv_variant_tests_abi() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_variant_tests.abi"; }
-   static const char* kv_bios_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_bios.wasm"; }
-   static const char* kv_bios_abi() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_bios.abi"; }
-   static const char* kv_singleton_tests_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_singleton_tests.wasm"; }
-   static const char* kv_singleton_tests_abi() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/kv_singleton_tests.abi"; }
+   static const char* kv_single_tests_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/kv_single_index_tests.wasm"; }
+   static const char* kv_variant_tests_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/kv_variant_tests.wasm"; }
+   static const char* kv_variant_tests_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/kv_variant_tests.abi"; }
+   static const char* kv_bios_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/kv_bios.wasm"; }
+   static const char* kv_bios_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/kv_bios.abi"; }
 
-   static const char* action_results_test_wasm() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/action_results_test.wasm"; }
-   static const char* action_results_test_abi() { return "${CMAKE_BINARY_DIR}/../unit/test_contracts/action_results_test.abi"; }
+   static const char* action_results_test_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/action_results_test.wasm"; }
+   static const char* action_results_test_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/action_results_test.abi"; }
+
+   static const char* pb_msg_test_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/pb_msg_test.wasm"; }
+   static const char* pb_msg_test_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/pb_msg_test.abi"; }
+
+   static const char* push_event_test_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/push_event_test.wasm"; }
+   static const char* push_event_test_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/push_event_test.abi"; }
+
+   static const char* malloc_free_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/malloc_free.wasm"; }
+   static const char* malloc_free_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/malloc_free.abi"; }
+
+
+   static const char* kv_migrate_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/kv_migrate.wasm"; }
+   static const char* kv_migrate_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/kv_migrate.abi"; }
+
+   static const char* rsa_verify_test_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/rsa_verify_test.wasm"; }
+   static const char* rsa_verify_test_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/rsa_verify_test.abi"; }
+
+   static const char* ecdsa_verify_test_wasm() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/ecdsa_verify_test.wasm"; }
+   static const char* ecdsa_verify_test_abi() { return "${CMAKE_BINARY_DIR}/../../unit/test_contracts/ecdsa_verify_test.abi"; }
 };
  
 }} //ns eosio::testing

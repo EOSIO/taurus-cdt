@@ -5,18 +5,16 @@
 
 #include <algorithm>
 
+extern "C" volatile uint64_t eosio_contract_name = 0;
+extern "C" void eosio_set_contract_name(uint64_t n) { eosio_contract_name = n; } // LLVM creates the call to this at the beginning of apply
+
 namespace eosio {
    extern "C" {
-      __attribute__((eosio_wasm_import))
-      uint64_t current_time();
-     __attribute__((eosio_wasm_import))
-     void set_blockchain_parameters_packed(char*, uint32_t);
-     __attribute__((eosio_wasm_import))
-     uint32_t get_blockchain_parameters_packed(char*, uint32_t);
-     __attribute__((eosio_wasm_import))
-     int64_t set_proposed_producers( char *producer_data, uint32_t producer_data_size );
-     __attribute__((eosio_wasm_import))
-     uint32_t get_active_producers(uint64_t*, uint32_t);
+      __attribute__((import_name("current_time"))) uint64_t current_time();
+     __attribute__((import_name("set_blockchain_parameters_packed"))) void set_blockchain_parameters_packed(char*, uint32_t);
+     __attribute__((import_name("get_blockchain_parameters_packed"))) uint32_t get_blockchain_parameters_packed(char*, uint32_t);
+     __attribute__((import_name("set_proposed_producers"))) int64_t set_proposed_producers( char *producer_data, uint32_t producer_data_size );
+     __attribute__((import_name("get_active_producers"))) uint32_t get_active_producers(uint64_t*, uint32_t);
    }
 
    // producer_schedule.hpp
@@ -72,12 +70,18 @@ namespace eosio {
 
    // system.hpp
    time_point current_time_point() {
-      static auto ct = time_point(microseconds(static_cast<int64_t>(current_time())));
+#ifdef __wasm__
+      static 
+#endif
+      auto ct = time_point(microseconds(static_cast<int64_t>(current_time())));
       return ct;
    }
 
    block_timestamp current_block_time() {
-      static auto bt = block_timestamp(current_time_point());
+#ifdef __wasm__
+      static 
+#endif      
+      auto bt = block_timestamp(current_time_point());
       return bt;
    }
 

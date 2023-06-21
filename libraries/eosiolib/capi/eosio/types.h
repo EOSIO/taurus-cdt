@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <wchar.h>
 
+typedef unsigned __int128 uint128_t;
+typedef __int128 int128_t;
 /**
  *  @defgroup c_types
  *  @ingroup c_api

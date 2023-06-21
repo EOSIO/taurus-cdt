@@ -4,8 +4,7 @@
  */
 
 #include <array>
-
-#include <eosio/tester.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/fixed_bytes.hpp>
 
 using std::array;
@@ -91,8 +90,8 @@ EOSIO_TEST_BEGIN(fixed_bytes_test)
    // CHECK_EQUAL( (fixed_bytes<20>::make_from_word_sequence<uint64_t>(1ULL, 2ULL)),
    //              (fixed_bytes<20>{array<uint64_t,2>{1ULL, 2ULL}}) )
 
-   CHECK_EQUAL( (fixed_bytes<32>::make_from_word_sequence<uint64_t>(1ULL,2ULL,3ULL,4ULL)),
-                (fixed_bytes<32>{array<uint64_t, 4>{1ULL,2ULL,3ULL,4ULL}}) )
+   CHECK_EQUAL( (fixed_bytes<32>::make_from_word_sequence<unsigned long long>(1ULL,2ULL,3ULL,4ULL)),
+                (fixed_bytes<32>{array<unsigned long long, 4>{1ULL,2ULL,3ULL,4ULL}}) )
 
    // -------------------------------------------------
    // array<uint8_t, Size> extract_as_byte_array()const
@@ -101,7 +100,7 @@ EOSIO_TEST_BEGIN(fixed_bytes_test)
                                                     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,
                                                     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04 };
 
-   CHECK_EQUAL( (fixed_bytes<32>{array<uint64_t, 4>{1ULL,2ULL,3ULL,4ULL}}.extract_as_byte_array()), extract_arr )
+   CHECK_EQUAL( (fixed_bytes<32>{array<unsigned long long, 4>{1ULL,2ULL,3ULL,4ULL}}.extract_as_byte_array()), extract_arr )
 
    // ----------------------------
    // const auto& get_array()const
@@ -143,9 +142,9 @@ EOSIO_TEST_BEGIN(fixed_bytes_test)
 
    // ---------------------------------------------------------------------------
    // friend bool operator== <>(const fixed_bytes<Size>, const fixed_bytes<Size>)
-   static const fixed_bytes<32> fb_cmp0{fixed_bytes<32>::make_from_word_sequence<uint64_t>(0ULL,0ULL,0ULL,0ULL)};
-   static const fixed_bytes<32> fb_cmp1{fixed_bytes<32>::make_from_word_sequence<uint64_t>(1ULL,1ULL,1ULL,1ULL)};
-   static const fixed_bytes<32> fb_cmp2{fixed_bytes<32>::make_from_word_sequence<uint64_t>(2ULL,2ULL,2ULL,2ULL)};
+   static const fixed_bytes<32> fb_cmp0{fixed_bytes<32>::make_from_word_sequence<unsigned long long>(0ULL,0ULL,0ULL,0ULL)};
+   static const fixed_bytes<32> fb_cmp1{fixed_bytes<32>::make_from_word_sequence<unsigned long long>(1ULL,1ULL,1ULL,1ULL)};
+   static const fixed_bytes<32> fb_cmp2{fixed_bytes<32>::make_from_word_sequence<unsigned long long>(2ULL,2ULL,2ULL,2ULL)};
 
    CHECK_EQUAL( fb_cmp1 == fb_cmp1, true  )
    CHECK_EQUAL( fb_cmp0 == fb_cmp1, false )

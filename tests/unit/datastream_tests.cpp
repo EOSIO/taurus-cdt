@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include <eosio/tester.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/binary_extension.hpp>
 #include <eosio/crypto.hpp>
 #include <eosio/datastream.hpp>
@@ -476,7 +476,7 @@ EOSIO_TEST_BEGIN(datastream_stream_test)
    // eosio::fixed_bytes
    ds.seekp(0);
    fill(begin(datastream_buffer), end(datastream_buffer), 0);
-   static const fixed_bytes<32> cfb{fixed_bytes<32>::make_from_word_sequence<uint64_t>(1ULL,2ULL,3ULL,4ULL)};
+   static const fixed_bytes<32> cfb{fixed_bytes<32>::make_from_word_sequence<uint64_t>(uint64_t(1),uint64_t(2),uint64_t(3),uint64_t(4))};
    fixed_bytes<32> fb{};
    ds << cfb;
    ds.seekp(0);

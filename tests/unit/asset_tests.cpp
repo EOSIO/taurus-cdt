@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <eosio/tester.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/asset.hpp>
 
 using std::string;

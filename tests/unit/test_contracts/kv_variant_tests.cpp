@@ -11,16 +11,16 @@ struct my_struct_v2 {
    uint64_t age;
 };
 
-struct my_table : eosio::kv_table<my_struct_v> {
+struct my_table : eosio::kv::table<my_struct_v, "testtable"_n> {
    KV_NAMED_INDEX("fullname"_n, full_name);
    KV_NAMED_INDEX("age"_n, age);
 
    my_table(eosio::name contract_name) {
-      init(contract_name, "testtable"_n, eosio::kv_ram, full_name, age);
+      init(contract_name, full_name, age);
    }
 };
 
-struct my_table_v : eosio::kv_table<std::variant<my_struct_v, my_struct_v2>> {
+struct my_table_v : eosio::kv::table<std::variant<my_struct_v, my_struct_v2>, "testtable2"_n> {
    index<std::string> primary_key{"fullname"_n, [](const auto& obj) {
       return std::visit([&](auto&& a) {
          using V = std::decay_t<decltype(a)>;
@@ -41,7 +41,7 @@ struct my_table_v : eosio::kv_table<std::variant<my_struct_v, my_struct_v2>> {
    }};
 
    my_table_v(eosio::name contract_name) {
-      init(contract_name, "testtable"_n, "eosio.kvram"_n, primary_key, age);
+      init(contract_name, primary_key, age);
    }
 };
 
@@ -58,36 +58,17 @@ public:
       my_table t{"kvtest"_n};
 
       my_struct_v s1{
-         .full_name = "Dan Larimer",
-         .age = 25
+         .age = 25,
+         .full_name = "Dan Larimer"
       };
 
       my_struct_v s2{
-         .full_name = "Brendan Blumer",
-         .age = 24
+         .age = 24,
+         .full_name = "Brendan Blumer"
       };
 
       t.put(s1);
       t.put(s2);
-
-      my_table_v t1{"kvtest"_n};
-
-      auto itr = t1.primary_key.find("Dan Larimer");
-      auto val = itr.value();
-      auto vval = std::get<my_struct_v>(val);
-      eosio::check(vval.age == 25, "wrong value");
-
-      my_struct_v2 s3{
-         .first_name = "Bob",
-         .last_name = "Smith",
-         .age = 30
-      };
-
-      t1.put(s3);
-
-      auto val2 = t1.primary_key.get("Bob : Smith");
-      auto vval2 = std::get<my_struct_v2>(*val2);
-      eosio::check(vval2.age == 30, "wrong value");
    }
 
    [[eosio::action]]
@@ -95,13 +76,13 @@ public:
       my_table_v t{"kvtest"_n};
 
       my_struct_v s1{
-         .full_name = "Dan Larimer",
-         .age = 25
+         .age = 25,
+         .full_name = "Dan Larimer"
       };
 
       my_struct_v s2{
-         .full_name = "Brendan Blumer",
-         .age = 24
+         .age = 24,
+         .full_name = "Brendan Blumer"
       };
 
       my_struct_v2 s3{

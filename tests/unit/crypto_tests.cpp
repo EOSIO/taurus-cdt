@@ -3,7 +3,7 @@
  *  @copyright defined in eosio.cdt/LICENSE.txt
  */
 
-#include <eosio/tester.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/crypto.hpp>
 
 using eosio::public_key;

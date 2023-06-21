@@ -8,41 +8,33 @@
 #include <string_view>
 #include <type_traits>
 
+typedef unsigned __int128 uint128_t;
+typedef __int128 int128_t;
+
 namespace eosio {
    namespace internal_use_do_not_use {
       extern "C" {
-         __attribute__((eosio_wasm_import))
-         void prints(const char*);
+         __attribute__((import_name("prints"))) void prints(const char*);
 
-         __attribute__((eosio_wasm_import))
-         void prints_l(const char*, uint32_t);
+         __attribute__((import_name("prints_l"))) void prints_l(const char*, uint32_t);
 
-         __attribute__((eosio_wasm_import))
-         void printi(int64_t);
+         __attribute__((import_name("printi"))) void printi(int64_t);
 
-         __attribute__((eosio_wasm_import))
-         void printui(uint64_t);
+         __attribute__((import_name("printui"))) void printui(uint64_t);
 
-         __attribute__((eosio_wasm_import))
-         void printi128(const int128_t*);
+         __attribute__((import_name("printi128"))) void printi128(const int128_t*);
 
-         __attribute__((eosio_wasm_import))
-         void printui128(const uint128_t*);
+         __attribute__((import_name("printui128"))) void printui128(const uint128_t*);
 
-         __attribute__((eosio_wasm_import))
-         void printsf(float);
+         __attribute__((import_name("printsf"))) void printsf(float);
 
-         __attribute__((eosio_wasm_import))
-         void printdf(double);
+         __attribute__((import_name("printdf"))) void printdf(double);
 
-         __attribute__((eosio_wasm_import))
-         void printqf(const long double*);
+         __attribute__((import_name("printqf"))) void printqf(const long double*);
 
-         __attribute__((eosio_wasm_import))
-         void printn(uint64_t);
+         __attribute__((import_name("printn"))) void printn(uint64_t);
 
-         __attribute__((eosio_wasm_import))
-         void printhex(const void*, uint32_t);
+         __attribute__((import_name("printhex"))) void printhex(const void*, uint32_t);
       }
 
    };

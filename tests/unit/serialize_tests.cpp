@@ -9,7 +9,7 @@
 #include <tuple>
 #include <vector>
 
-#include <eosio/tester.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/datastream.hpp>
 #include <eosio/serialize.hpp>
 

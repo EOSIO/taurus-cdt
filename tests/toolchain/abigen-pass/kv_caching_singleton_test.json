@@ -1,0 +1,9 @@
+{
+    "tests": [
+        {
+            "expected": {
+                "abi-file": "kv_caching_singleton_test.abi"
+            }
+        }
+    ]
+}

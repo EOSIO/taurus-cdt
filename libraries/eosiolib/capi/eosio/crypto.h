@@ -37,7 +37,7 @@ extern "C" {
  *  eosio::print("sha256 hash generated from data equals provided hash");
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("assert_sha256")))
 void assert_sha256( const char* data, uint32_t length, const struct capi_checksum256* hash );
 
 /**
@@ -62,7 +62,7 @@ void assert_sha256( const char* data, uint32_t length, const struct capi_checksu
  *  eosio::print("sha1 hash generated from data equals provided hash");
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("assert_sha1")))
 void assert_sha1( const char* data, uint32_t length, const struct capi_checksum160* hash );
 
 /**
@@ -87,7 +87,7 @@ void assert_sha1( const char* data, uint32_t length, const struct capi_checksum1
  *  eosio::print("sha512 hash generated from data equals provided hash");
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("assert_sha512")))
 void assert_sha512( const char* data, uint32_t length, const struct capi_checksum512* hash );
 
 /**
@@ -111,7 +111,7 @@ void assert_sha512( const char* data, uint32_t length, const struct capi_checksu
  *  eosio::print("ripemod160 hash generated from data equals provided hash");
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("assert_ripemd160")))
 void assert_ripemd160( const char* data, uint32_t length, const struct capi_checksum160* hash );
 
 /**
@@ -129,7 +129,7 @@ void assert_ripemd160( const char* data, uint32_t length, const struct capi_chec
  *  eos_assert( calc_hash == hash, "invalid hash" );
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("sha256")))
 void sha256( const char* data, uint32_t length, struct capi_checksum256* hash );
 
 /**
@@ -147,7 +147,7 @@ void sha256( const char* data, uint32_t length, struct capi_checksum256* hash );
  *  eos_assert( calc_hash == hash, "invalid hash" );
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("sha1")))
 void sha1( const char* data, uint32_t length, struct capi_checksum160* hash );
 
 /**
@@ -165,7 +165,7 @@ void sha1( const char* data, uint32_t length, struct capi_checksum160* hash );
  *  eos_assert( calc_hash == hash, "invalid hash" );
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("sha512")))
 void sha512( const char* data, uint32_t length, struct capi_checksum512* hash );
 
 /**
@@ -183,7 +183,7 @@ void sha512( const char* data, uint32_t length, struct capi_checksum512* hash );
  *  eos_assert( calc_hash == hash, "invalid hash" );
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("ripemd160")))
 void ripemd160( const char* data, uint32_t length, struct capi_checksum160* hash );
 
 /**
@@ -201,8 +201,8 @@ void ripemd160( const char* data, uint32_t length, struct capi_checksum160* hash
  *  @code
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
-int recover_key( const struct capi_checksum256* digest, const char* sig, size_t siglen, char* pub, size_t publen );
+__attribute__((import_name("recover_key")))
+int32_t recover_key( const struct capi_checksum256* digest, const char* sig, uint32_t siglen, char* pub, uint32_t publen );
 
 /**
  *  Tests a given public key with the generated key from digest and the signature.
@@ -221,16 +221,16 @@ int recover_key( const struct capi_checksum256* digest, const char* sig, size_t 
  *  @code
  *  checksum digest;
  *  char sig;
- *  size_t siglen;
+ *  uint32_t siglen;
  *  char pub;
- *  size_t publen;
+ *  uint32_t publen;
  *  assert_recover_key( digest, sig, siglen, pub, publen )
  *  // If the given public key does not match with the generated key from digest and the signature, anything below will never fire.
  *  eosio::print("pub key matches the pub key generated from digest");
  *  @endcode
  */
-__attribute__((eosio_wasm_import))
-void assert_recover_key( const struct capi_checksum256* digest, const char* sig, size_t siglen, const char* pub, size_t publen );
+__attribute__((import_name("assert_recover_key")))
+void assert_recover_key( const struct capi_checksum256* digest, const char* sig, uint32_t siglen, const char* pub, uint32_t publen );
 
 #ifdef __cplusplus
 }

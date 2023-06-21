@@ -37,7 +37,6 @@
 # Build
 build/*
 build-*/*
-
 # Python
 __pycache__/
 .mypy_cache/
@@ -45,3 +44,11 @@ __pycache__/
 # Editor Files
 .vscode/
 *.vim
+.idea/
+.ccls-cache/
+
+# CLion
+.idea
+cmake-build-*
+
+**/build/*

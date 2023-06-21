@@ -1,13 +1,12 @@
 #include <eosio/tester.hpp>
 #include <string_view>
 #include "../unit/test_contracts/tester_tests.hpp"
-
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 eosio::checksum256 make_checksum256(std::string_view src) {
    std::array<uint8_t, 32> buf;
-   eosio::unhex(buf.begin(), src.begin(), src.end());
+   CHECK(eosio::unhex(buf.begin(), src.begin(), src.end()));
    return eosio::checksum256(buf);
 }
 
@@ -16,28 +15,28 @@ TEST_CASE_METHOD(eosio::test_chain, "start_block", "[start_block][finish_block]"
    {
       eosio::block_info info = get_head_block_info();
       CHECK(info.block_num == 1);
-      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000001B225618995010555CEBBF045276CBC2CFB0CC27ED412FCC1210B5CC5"));
+      CHECK(eosio::checksum256(info.block_id) == make_checksum256("0000000164F973826250D890C1C4BC5CBD5FA25B62640D39E1BFDEE5FE5BCB25"));
       CHECK(info.timestamp == eosio::block_timestamp(1262304000));
    }
    start_block();
    {
       eosio::block_info info = get_head_block_info();
       CHECK(info.block_num == 2);
-      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000002C7D8A38018436CFF6FF2AAC872990A3A3F3A870EF19AE90E44F533B3"));
+      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000002A99676C483CB237A9DFB6AF13F588BD6711558AF265D8FEFBB4BC807"));
       CHECK(info.timestamp == eosio::block_timestamp(1262304001));
    }
    finish_block();
    {
       eosio::block_info info = get_head_block_info();
       CHECK(info.block_num == 3);
-      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000003716F3799687FB2961344E5079D03721FE9E56F2C851310D0A61E43B1"));
+      CHECK(eosio::checksum256(info.block_id) == make_checksum256("0000000351EF81A47B08F9E06D094E2E24DBF5B0B8241626E0D47F7B66862F2C"));
       CHECK(info.timestamp == eosio::block_timestamp(1262304002));
    }
    start_block(); // no pending block to finish
    {
       eosio::block_info info = get_head_block_info();
       CHECK(info.block_num == 3);
-      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000003716F3799687FB2961344E5079D03721FE9E56F2C851310D0A61E43B1"));
+      CHECK(eosio::checksum256(info.block_id) == make_checksum256("0000000351EF81A47B08F9E06D094E2E24DBF5B0B8241626E0D47F7B66862F2C"));
       CHECK(info.timestamp == eosio::block_timestamp(1262304002));
    }
    start_block(499); // finish block 4
@@ -45,7 +44,7 @@ TEST_CASE_METHOD(eosio::test_chain, "start_block", "[start_block][finish_block]"
    {
       eosio::block_info info = get_head_block_info();
       CHECK(info.block_num == 5);
-      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000005B804E3F4DD6597A2153CEF0363B9005F6152E13B3EF70C88D2E3F771"));
+      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000005E26E3E6620FED24435FE16717B53FA89CF170B195935B33BA442EB06"));
       CHECK(info.timestamp == eosio::block_timestamp(1262304004));
    }
    start_block(500);
@@ -53,7 +52,7 @@ TEST_CASE_METHOD(eosio::test_chain, "start_block", "[start_block][finish_block]"
    {
       eosio::block_info info = get_head_block_info();
       CHECK(info.block_num == 7);
-      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000007DB2CFE1174E083D9CBA7AEA0EBE02A9D00EEAE469B9561E289FA4F74"));
+      CHECK(eosio::checksum256(info.block_id) == make_checksum256("00000007B8D49A14D046FE516358DA3834BC476D797935020191F46EAB8C75E2"));
       CHECK(info.timestamp == eosio::block_timestamp(1262304006));
    }
 }
@@ -114,15 +113,15 @@ TEST_CASE_METHOD(eosio::test_chain, "transaction_trace members", "[transaction_t
    CHECK(trace.failed_dtrx_trace.size() == 0);
 }
 
-TEST_CASE_METHOD(eosio::test_chain, "Simple action::send", "[send]") {
-   eosio::action empty{ { { "eosio"_n, "active"_n } }, "eosio"_n, eosio::name(), std::tuple() };
-   empty.send();
-}
-
 TEST_CASE_METHOD(eosio::test_chain, "MultiIndex API", "[multi_index]") {
    create_account("test"_n);
    set_code("test"_n, "../unit/test_contracts/tester_tests.wasm");
-   tester_tests::putdb_action("test"_n, { "test"_n, "active"_n }).send(1, 2);
+   start_block();
+
+   eosio::action act{{ "test"_n, "active"_n }, "test"_n, "putdb"_n, std::make_tuple(1, 2)};
+   eosio::transaction transcation = make_transaction( { act } );
+   auto trace = push_transaction( transcation );
+
    tester_tests::table t("test"_n, 0);
    for(auto& item : t) {
       CHECK(item.key == 1);

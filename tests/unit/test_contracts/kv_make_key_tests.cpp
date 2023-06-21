@@ -2,8 +2,9 @@
 
 struct testing_struct {
    uint16_t a;
-   uint16_t b;
+   std::string b;
 
+   BLUEGRASS_META_REFL(a, b);
    bool operator==(const testing_struct& rhs) const {
       return a == rhs.a && b == rhs.b;
    }
@@ -33,7 +34,7 @@ struct my_struct {
    }
 };
 
-struct my_table : eosio::kv_table<my_struct> {
+struct my_table : eosio::kv::table<my_struct, "testtable"_n> {
    KV_NAMED_INDEX("t1"_n, tname)
    KV_NAMED_INDEX("t2"_n, tstring)
    KV_NAMED_INDEX("t3"_n, tui64)
@@ -45,7 +46,7 @@ struct my_table : eosio::kv_table<my_struct> {
    KV_NAMED_INDEX("t14"_n, ttuple)
 
    my_table(eosio::name contract_name) {
-      init(contract_name, "testtable"_n, "eosio.kvram"_n, tname, tstring, tui64, ti32, tui128, tfloat, tdouble, tstruct, ttuple);
+      init(contract_name, tname, tstring, tui64, ti32, tui128, tfloat, tdouble, tstruct, ttuple);
    }
 };
 
@@ -74,7 +75,7 @@ public:
       .tui128 = 1000,
       .tfloat = 4.2574,
       .tdouble = 4.2574,
-      .tstruct = { 1, 2 },
+      .tstruct = { 1, "a" },
       .ttuple = { 100, 32.43, "abc"}
    };
    my_struct s2{
@@ -85,7 +86,7 @@ public:
       .tui128 = 0,
       .tfloat = 5.2574,
       .tdouble = 50000.2574,
-      .tstruct = { 5, 6 },
+      .tstruct = { 5, "c" },
       .ttuple = { 100, 32.43, "def"}
    };
    my_struct s3{
@@ -93,10 +94,10 @@ public:
       .tstring = "e",
       .tui64 = 3,
       .ti32 = -2,
-      .tfloat = 187234,
       .tui128 = (static_cast<uint128_t>(1) << 127) - 1,
+      .tfloat = 187234,
       .tdouble = 1872340000,
-      .tstruct = { 3, 4 },
+      .tstruct = { 3, "b" },
       .ttuple = { 100, 33.43, "abc"}
    };
    my_struct s4{
@@ -107,7 +108,7 @@ public:
       .tui128 = (static_cast<uint128_t>(1) << 127) - 2,
       .tfloat = 0,
       .tdouble = 0,
-      .tstruct = { 7, 8 },
+      .tstruct = { 7, "d" },
       .ttuple = { 101, 32.43, "abc"}
    };
    my_struct s5{
@@ -118,7 +119,7 @@ public:
       .tui128 = 54321,
       .tfloat = -4.2574,
       .tdouble = -40000.2574,
-      .tstruct = { 9, 10 },
+      .tstruct = { 9, "e" },
       .ttuple = { 101, 34.43, "abc"}
    };
 
@@ -126,11 +127,11 @@ public:
    void setup() {
       my_table t{"kvtest"_n};
 
-      t.put(s1);
-      t.put(s2);
-      t.put(s3);
-      t.put(s4);
-      t.put(s5);
+      t.put(s1, get_self());
+      t.put(s2, get_self());
+      t.put(s3, get_self());
+      t.put(s4, get_self());
+      t.put(s5, get_self());
    }
 
    [[eosio::action]]

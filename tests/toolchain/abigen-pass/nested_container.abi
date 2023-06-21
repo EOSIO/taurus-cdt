@@ -1,0 +1,100 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.3",
+    "types": [],
+    "structs": [
+        {
+            "name": "map2map",
+            "base": "",
+            "fields": [
+                {
+                    "name": "m",
+                    "type": "pair_string_string[]"
+                },
+                {
+                    "name": "m2m",
+                    "type": "pair_string_map_string_string[]"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_map_string_string",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "pair_string_string[]"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_string",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "settuple2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "tp2",
+                    "type": "tuple_int32_float64_string_int32_array"
+                }
+            ]
+        },
+        {
+            "name": "tuple_int32_float64_string_int32_array",
+            "base": "",
+            "fields": [
+                {
+                    "name": "field_0",
+                    "type": "int32"
+                },
+                {
+                    "name": "field_1",
+                    "type": "float64"
+                },
+                {
+                    "name": "field_2",
+                    "type": "string"
+                },
+                {
+                    "name": "field_3",
+                    "type": "int32[]"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "map2map",
+            "type": "map2map",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "settuple2",
+            "type": "settuple2",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": []
+}

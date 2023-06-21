@@ -1,8 +1,7 @@
 ---
 content_title: eosio::binary_extension
 ---
-
-You can find the implementation of `eosio::binary_extension` in the `eosio.cdt` repository in [binary_extension.hpp](https://github.com/EOSIO/eosio.cdt/blob/master/libraries/eosiolib/binary_extension.hpp).
+You can find the implementation of `eosio::binary_extension` in the EOSIO-Taurus CDT repository in [`binary_extension.hpp`](../../libraries/eosiolib/core/eosio/binary_extension.hpp).
 
 The primary concern when using this type is when you are adding a new field to a smart contract's data structure that is currently utilized in an `eosio::multi_index` type (AKA a _table_), or when adding a new parameter to an action declaration.
 
@@ -42,7 +41,7 @@ public:
    struct [[eosio::table]] structure {
       eosio::name _primary_key;
       eosio::name _secondary_key;
-         
+
       uint64_t primary_key()   const { return _primary_key.value;   }
       uint64_t secondary_key() const { return _secondary_key.value; }
    };
@@ -66,10 +65,10 @@ using eosio::name;
 
 [[eosio::action]] void binary_extension_contract::regpkey(name primary_key) {
    eosio::print_f("`regpkey` executing.\n");
-   
+
    auto index{_table.get_index<"index1"_n>()}; ///< `index` represents `_table` organized by `index1`.
    auto iter {index.find(primary_key.value) }; ///< Note: the type returned by `index.find` is different than the type returned by `_table.find`.
-   
+
    if (iter == _table.get_index<"index1"_n>().end()) {
       eosio::print_f("`_primary_key`: % not found; registering.\n", primary_key.to_string());
       _table.emplace(_self, [&](auto& row) {
@@ -86,10 +85,10 @@ using eosio::name;
 
 [[eosio::action]] void binary_extension_contract::printbyp(eosio::name primary_key) {
    eosio::print_f("`printbyp` executing.\n");
-   
+
    auto index{_table.get_index<"index1"_n>()};
    auto iter {index.find(primary_key.value) };
-   
+
    if (iter != _table.get_index<"index1"_n>().end()) {
       eosio::print_f("`_primary_key`: % found; printing.\n", primary_key.to_string());
       eosio::print_f("{%, %}\n", iter->_primary_key, iter->_secondary_key);
@@ -103,10 +102,10 @@ using eosio::name;
 
 [[eosio::action]] void binary_extension_contract::printbys(eosio::name secondary_key) {
    eosio::print_f("`printbys` executing.\n");
-   
+
    auto index{_table.get_index<"index2"_n>()};
    auto iter {index.find(secondary_key.value)};
-   
+
    if (iter != _table.get_index<"index2"_n>().end()) {
       eosio::print_f("`_secondary_key`: % found; printing.\n", secondary_key.to_string());
       printbyp(iter->_primary_key);
@@ -120,10 +119,10 @@ using eosio::name;
 
 [[eosio::action]] void binary_extension_contract::modifyp(eosio::name primary_key, name n) {
    eosio::print_f("`modifyp` executing.\n");
-   
+
    auto index{_table.get_index<"index1"_n>()};
    auto iter {index.find(primary_key.value)};
-   
+
    if (iter != _table.get_index<"index1"_n>().end()) {
       eosio::print_f("`_primary_key`: % found; modifying `_primary_key`.\n", primary_key.to_string());
       index.modify(iter, _self, [&](auto& row) {
@@ -139,10 +138,10 @@ using eosio::name;
 
 [[eosio::action]] void binary_extension_contract::modifys(eosio::name primary_key, name n) {
    eosio::print_f("`modifys` executing.\n");
-   
+
    auto index{_table.get_index<"index1"_n>()};
    auto iter {index.find(primary_key.value)};
-   
+
    if (iter != _table.get_index<"index1"_n>().end()) {
       eosio::print_f("`_primary_key`: % found; modifying `_secondary_key`.\n", primary_key.to_string());
       index.modify(iter, _self, [&](auto& row) {
@@ -304,10 +303,10 @@ struct [[eosio::table]] structure {
 ```c++
 [[eosio::action]] void binary_extension_contract::regpkey(name primary_key) {
    eosio::print_f("`regpkey` executing.\n");
-   
+
    auto index{_table.get_index<"index1"_n>()}; ///< `index` represents `_table` organized by `index1`.
    auto iter {index.find(primary_key.value) }; ///< Note: the type returned by `index.find` is different than the type returned by `_table.find`.
-   
+
    if (iter == _table.get_index<"index1"_n>().end()) {
       eosio::print_f("`_primary_key`: % not found; registering.\n", primary_key.to_string());
       _table.emplace(_self, [&](auto& row) {
@@ -323,7 +322,7 @@ struct [[eosio::table]] structure {
 }
 ```
 
-And their corresponding sections in the `.abi` files:
+Find below their corresponding sections in the `.abi` files:
 
 **binary_extension_contract.abi**
 
@@ -437,10 +436,10 @@ struct [[eosio::table]] structure {
 +[[eosio::action]] void binary_extension_contract::regpkey(name primary_key, name secondary_key) {
 -[[eosio::action]] void binary_extension_contract::regpkey(name primary_key) {
    eosio::print_f("`regpkey` executing.\n");
-   
+
    auto index{_table.get_index<"index1"_n>()}; ///< `index` represents `_table` organized by `index1`.
    auto iter {index.find(primary_key.value) }; ///< Note: the type returned by `index.find` is different than the type returned by `_table.find`.
-   
+
    if (iter == _table.get_index<"index1"_n>().end()) {
       eosio::print_f("`_primary_key`: % not found; registering.\n", primary_key.to_string());
       _table.emplace(_self, [&](auto& row) {
@@ -570,10 +569,10 @@ struct [[eosio::table]] structure {
 +[[eosio::action]] void binary_extension_contract::regpkey(name primary_key, binary_extension<name> secondary_key) {
 -[[eosio::action]] void binary_extension_contract::regpkey(name primary_key, name secondary_key) {
    eosio::print_f("`regpkey` executing.\n");
-   
+
    auto index{_table.get_index<"index1"_n>()}; ///< `index` represents `_table` organized by `index1`.
    auto iter {index.find(primary_key.value) }; ///< Note: the type returned by `index.find` is different than the type returned by `_table.find`.
-   
+
    if (iter == _table.get_index<"index1"_n>().end()) {
       eosio::print_f("`_primary_key`: % not found; registering.\n", primary_key.to_string());
       _table.emplace(_self, [&](auto& row) {

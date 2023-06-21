@@ -1,15 +1,11 @@
-if(EOSIO_CDT_ROOT STREQUAL "" OR NOT EOSIO_CDT_ROOT)
-   set(EOSIO_CDT_ROOT "@CDT_ROOT_DIR@")
-endif()
 
-list(APPEND CMAKE_MODULE_PATH ${EOSIO_CDT_ROOT}/lib/cmake/eosio.cdt)
-if (NOT EOSIO_WASM_OLD_BEHAVIOR STREQUAL "Off")
-    set(EOSIO_WASM_OLD_BEHAVIOR "On")
-    include(EosioWasmToolchain)
-endif()
+set(EOSIO_CDT_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../..)
+set(EOSIO_CDT_VERSION "@VERSION_FULL@")
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+set(CMAKE_SHARED_MODULE_PREFIX "")
 include(EosioCDTMacros)
-  
+include(${CMAKE_CURRENT_LIST_DIR}/${CMAKE_SYSTEM_PROCESSOR}/EosioTargets.cmake)  
 
 function(EXTRACT_MAJOR_MINOR_FROM_VERSION version success major minor)
    string(REGEX REPLACE "^([0-9]+)\\..+$" "\\1" _major "${version}")
