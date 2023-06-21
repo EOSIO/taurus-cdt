@@ -15,6 +15,12 @@
 namespace eosio {
 namespace internal_use_do_not_use {
 
+   extern "C" {
+   [[clang::import_name("open_file")]]  int32_t open_file(const char* filename, uint32_t filename_size, const char* mode, uint32_t mode_size);
+   [[clang::import_name("close_file")]] void    close_file(int32_t file_index);
+   [[clang::import_name("write_file")]] bool    write_file(int32_t file_index, const char* content, uint32_t content_size);
+   }
+
    std::vector<char> query_database_chain(uint32_t chain, const std::vector<char>& packed_req);
    void hex(const uint8_t* begin, const uint8_t* end, std::ostream& os);
 
@@ -28,6 +34,8 @@ namespace internal_use_do_not_use {
 const std::vector<std::string>& get_args();
 
 std::vector<char> read_whole_file(std::string_view filename);
+std::vector<char> read_abi_file(std::string_view filename);
+
 
 int32_t execute(std::string_view command);
 
@@ -140,6 +148,7 @@ class test_chain {
  private:
    uint32_t                               id;
    std::optional<block_info>              head_block_info;
+   std::vector<std::vector<char>>         event_queue;
 
  public:
    static const public_key  default_pub_key;
@@ -192,6 +201,12 @@ class test_chain {
     */
    void finish_block();
 
+   /**
+    * Writes snapshot to the provided snapshot filename
+    * @param snapshot_filename the file to write current snapshot to
+    */
+   void write_snapshot(const char* snapshot_filename);
+
    const block_info& get_head_block_info();
 
    /*
@@ -230,7 +245,7 @@ class test_chain {
    auto action_with_return(const Action& action, Args&&... args) {
       using Ret  = decltype(internal_use_do_not_use::get_return_type(Action::get_mem_ptr()));
       auto trace = transact({action.to_action(std::forward<Args>(args)...)});
-      return convert_from_bin<Ret>(trace.action_traces[0].return_value);
+      return unpack<Ret>(trace.action_traces[0].return_value);
    }
 
 
@@ -239,7 +254,7 @@ class test_chain {
       using Ret  = decltype(internal_use_do_not_use::get_return_type(Action::get_mem_ptr()));
       auto trace = transact({action.to_action(std::forward<Args>(args)...)});
       if constexpr ( !std::is_same_v<Ret,void> ) {
-         return convert_from_bin<Ret>(trace.action_traces[0].return_value);
+         return unpack<Ret>(trace.action_traces[0].return_value);
       } else {
          return trace;
       }
@@ -303,7 +318,7 @@ class test_chain {
       std::vector<char> memory;
 
       ship_protocol::get_blocks_result_base              result;
-      std::optional<ship_protocol::signed_block_variant> block;
+      std::optional<ship_protocol::block_header>         block_header;
       std::vector<ship_protocol::transaction_trace>      traces;
       std::vector<ship_protocol::table_delta>            deltas;
    };
@@ -354,6 +369,16 @@ class test_chain {
    transaction_trace issue_and_transfer(const name& contract, const name& issuer, const name& to,
                                         const asset& amount, const std::string& memo = "",
                                         const char* expected_except = nullptr);
+
+   void setup_event_queue();
+
+   std::vector<eosio::event_wrapper> pull_events();
+
+   inline eosio::checksum256 make_checksum256(std::string_view src) {
+      std::array<uint8_t, 32> buf = {};
+      bool success = eosio::unhex(buf.begin(), src.begin(), src.end());
+      return eosio::checksum256(buf);
+   }
 }; // test_chain
 
 /**
@@ -402,7 +427,7 @@ class test_rodeos {
       using Ret  = decltype(internal_use_do_not_use::get_return_type(Action::get_mem_ptr()));
       auto trace = transact({ action.to_action(std::forward<Args>(args)...) });
       if constexpr (!std::is_same_v<Ret, void>) {
-         return convert_from_bin<Ret>(trace.action_traces[0].return_value);
+         return unpack<Ret>(trace.action_traces[0].return_value);
       } else {
          return trace;
       }

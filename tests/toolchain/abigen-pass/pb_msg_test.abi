@@ -1,0 +1,101 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.3",
+    "types": [],
+    "actions": [
+        {
+            "name": "hi",
+            "type": "protobuf::test.ActData",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": [
+        {
+            "name": "hi",
+            "result_type": "protobuf::test.ActResult"
+        }
+    ],
+    "protobuf_types": {
+        "file": [
+            {
+                "name": "test.proto",
+                "package": "test",
+                "messageType": [
+                    {
+                        "name": "ActData",
+                        "field": [
+                            {
+                                "name": "id",
+                                "number": 1,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_INT32"
+                            },
+                            {
+                                "name": "type",
+                                "number": 2,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_INT32"
+                            },
+                            {
+                                "name": "note",
+                                "number": 3,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_STRING"
+                            },
+                            {
+                                "name": "account",
+                                "number": 5,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_FIXED64"
+                            },
+                            {
+                                "name": "optional_string",
+                                "number": 6,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_STRING",
+                                "options": {}
+                            },
+                            {
+                                "name": "optional_bytes",
+                                "number": 7,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_BYTES",
+                                "options": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "ActResult",
+                        "field": [
+                            {
+                                "name": "value",
+                                "number": 1,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_INT32",
+                                "options": {}
+                            },
+                            {   
+                                "name": "opt_str_value",
+                                "number": 2,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_STRING",
+                                "options": {}
+                            },
+                            {   
+                                "name": "opt_bytes_value",
+                                "number": 3,
+                                "label": "LABEL_OPTIONAL",
+                                "type": "TYPE_BYTES",
+                                "options": {}
+                            }
+                        ]
+                    }
+                ],
+                "syntax": "proto3"
+            }
+        ]
+    }
+}

@@ -1,105 +1,63 @@
-file(GLOB HEADERS "*.hpp"
-                  "*.h")
+set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
 
-add_library(eosio
-            eosiolib.cpp
-            crypto.cpp
-            tester/fpconv.c
-            ${CMAKE_SOURCE_DIR}/abieos/src/crypto.cpp
-            ${HEADERS})
+set(eosio_SOURCES eosiolib.cpp crypto.cpp tester/fpconv.c
+                  ${abieos_SOURCE_DIR}/src/crypto.cpp)
 
-add_library(eosio_malloc
-            malloc.cpp
-            ${HEADERS})
+if (IS_WASM_TARGET) 
+  list(APPEND eosio_SOURCES simple_malloc.cpp)
+endif()
 
-add_library(eosio_dsm
-            simple_malloc.cpp
-            ${HEADERS})
+add_library(eosio ${eosio_SOURCES})
+target_compile_definitions(eosio PUBLIC BOOST_DISABLE_ASSERTS __eosio_cdt__)
+target_include_directories(
+  eosio
+  PUBLIC $<BUILD_INTERFACE:${boost_SOURCE_DIR}>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../meta_refl/include>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/core>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/contracts>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/malloc>
+         $<BUILD_INTERFACE:${abieos_SOURCE_DIR}/include>
+         $<BUILD_INTERFACE:${abieos_SOURCE_DIR}/external/rapidjson/include>
+         $<BUILD_INTERFACE:${zpp_bits_SOURCE_DIR}>
+         $<BUILD_INTERFACE:${magic_enum_SOURCE_DIR}/include>
+         $<INSTALL_INTERFACE:include>)
 
-add_library(eosio_cmem
-            memory.cpp
-            ${HEADERS})
+add_library(crt0 OBJECT tester/crt0.cpp)
+target_link_libraries(crt0 PRIVATE eosio)
+target_include_directories(crt0 PRIVATE ${fmt_SOURCE_DIR}/include
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/tester)
 
-add_library(eosio_tester
-            tester/tester.cpp
-            tester/tester_intrinsics.cpp
-            ${CMAKE_SOURCE_DIR}/abieos/src/crypto.cpp
-            ${HEADERS})
 
-add_library(eosio_embed
-            tester/fpconv.c
-            ${CMAKE_SOURCE_DIR}/abieos/src/crypto.cpp
-            embed/eosio/eosio_assert.cpp
-            embed/eosio/printi.cpp
-            embed/eosio/printn.cpp
-            embed/eosio/prints.cpp
-            embed/eosio/printui.cpp
-            ${HEADERS})
+add_library(tester tester/tester.cpp tester/tester_intrinsics.cpp 
+                         ${abieos_SOURCE_DIR}/src/crypto.cpp)
+add_library(eosio::tester ALIAS tester)
 
-set(abieos_includes ${CMAKE_SOURCE_DIR}/abieos/include
-                    ${CMAKE_SOURCE_DIR}/abieos/src
-                    ${CMAKE_SOURCE_DIR}/abieos/external/rapidjson/include)
+target_compile_definitions(tester PUBLIC CATCH_CONFIG_NO_POSIX_SIGNALS EOSIO_BUILD_TESTER_CONTRACT)
+target_include_directories(
+  tester
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tester>
+         $<BUILD_INTERFACE:${fmt_SOURCE_DIR}/include>
+         $<BUILD_INTERFACE:${catch2_SOURCE_DIR}/single_include>)
+target_link_libraries(
+  tester
+  PUBLIC eosio
+  INTERFACE ${EXTRA_TARGETS} $<TARGET_OBJECTS:eosio::tester> )
 
-target_include_directories(eosio_tester PUBLIC
-                                        ${CMAKE_SOURCE_DIR}/eosiolib/tester
-                                        ${CMAKE_SOURCE_DIR}/eosiolib/core
-                                        ${CMAKE_SOURCE_DIR}/eosiolib/contracts
-                                        ${abieos_includes}
-                                        ${CMAKE_SOURCE_DIR}/boost/include
-                                        ${CMAKE_SOURCE_DIR}/fmt/include)
+target_sources(tester INTERFACE $<TARGET_OBJECTS:eosio::crt0>)
+target_link_options(tester INTERFACE $<$<PLATFORM_ID:Generic>:-Wl,--entry,start -Wl,--export-table>)
 
-target_compile_options(eosio_tester PRIVATE -fno-default-paths)
-target_link_libraries(eosio_tester c++)
+set(embed_SOURCES
+    embed/eosio/eosio_assert.cpp embed/eosio/printi.cpp embed/eosio/printn.cpp
+    embed/eosio/prints.cpp embed/eosio/printui.cpp)
 
-add_custom_command(
-   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/crt0.o
-   COMMAND ${CMAKE_CXX_COMPILER} -fno-default-paths -c -o ${CMAKE_CURRENT_BINARY_DIR}/crt0.o "-I$<JOIN:$<TARGET_PROPERTY:eosio_tester,INCLUDE_DIRECTORIES>,;-I>" ${CMAKE_SOURCE_DIR}/eosiolib/tester/crt0.cpp
-   DEPENDS ${CMAKE_SOURCE_DIR}/eosiolib/tester/crt0.cpp
-   COMMENT "Building C++ object crt0.o"
-   COMMAND_EXPAND_LISTS
-)
-add_custom_target(crt0.o.target DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/crt0.o)
-add_dependencies(eosio_tester crt0.o.target)
+add_library(embed tester/fpconv.c ${abieos_SOURCE_DIR}/src/crypto.cpp
+                        ${embed_SOURCES})
+target_include_directories(
+  embed PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/embed>)
+target_link_libraries(
+  embed
+  PUBLIC eosio
+  INTERFACE ${EXTRA_TARGETS})
 
-add_native_library(native_eosio
-                   eosiolib.cpp
-                   crypto.cpp
-                   malloc.cpp
-                   ${HEADERS})
+set_target_properties(tester embed PROPERTIES PREFIX libeosio_)
 
-set_target_properties(eosio_malloc PROPERTIES LINKER_LANGUAGE C)
-
-target_include_directories(eosio PUBLIC
-                                 ${CMAKE_SOURCE_DIR}
-                                 ${CMAKE_SOURCE_DIR}/eosiolib/core
-                                 ${CMAKE_SOURCE_DIR}/eosiolib/contracts
-                                 ${abieos_includes}
-                                 ${CMAKE_SOURCE_DIR}/boost/include)
-
-target_include_directories(native_eosio PUBLIC
-                                 ${CMAKE_SOURCE_DIR}/eosiolib/core
-                                 ${CMAKE_SOURCE_DIR}/eosiolib/contracts
-                                 ${abieos_includes}
-                                 ${CMAKE_SOURCE_DIR}/boost/include)
-
-target_link_libraries( eosio c++ c )
-add_dependencies( native_eosio eosio )
-
-add_custom_command( TARGET eosio POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:eosio> ${BASE_BINARY_DIR}/lib )
-add_custom_command( TARGET eosio_malloc POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:eosio_malloc> ${BASE_BINARY_DIR}/lib )
-add_custom_command( TARGET eosio_dsm POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:eosio_dsm> ${BASE_BINARY_DIR}/lib )
-add_custom_command( TARGET eosio_cmem POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:eosio_cmem> ${BASE_BINARY_DIR}/lib )
-add_custom_command( TARGET eosio_tester POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:eosio_tester> ${BASE_BINARY_DIR}/lib )
-add_custom_command( TARGET eosio_embed POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:eosio_embed> ${BASE_BINARY_DIR}/lib )
-add_custom_command( TARGET native_eosio POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:native_eosio> ${BASE_BINARY_DIR}/lib )
-add_custom_command( TARGET eosio_tester POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/crt0.o ${BASE_BINARY_DIR}/lib )
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../eosiolib DESTINATION ${BASE_BINARY_DIR}/include FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../abieos/include/eosio DESTINATION ${BASE_BINARY_DIR}/include/abieos FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../abieos/src/abieos.h DESTINATION ${BASE_BINARY_DIR}/include/abieos)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../abieos/src/abieos.hpp DESTINATION ${BASE_BINARY_DIR}/include/abieos)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../abieos/src/abieos_numeric.hpp DESTINATION ${BASE_BINARY_DIR}/include/abieos)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../abieos/src/abieos_ripemd160.hpp DESTINATION ${BASE_BINARY_DIR}/include/abieos)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../abieos/external/rapidjson/include/rapidjson DESTINATION ${BASE_BINARY_DIR}/include/rapidjson FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../fmt/include/fmt DESTINATION ${BASE_BINARY_DIR}/include/fmt FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../Catch2/single_include/catch2 DESTINATION ${BASE_BINARY_DIR}/include FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")

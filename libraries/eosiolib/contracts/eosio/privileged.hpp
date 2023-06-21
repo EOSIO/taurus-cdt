@@ -10,32 +10,51 @@ namespace eosio {
 
    namespace internal_use_do_not_use {
       extern "C" {
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("is_privileged"))) 
          bool is_privileged( uint64_t account );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("get_resource_limits"))) 
          void get_resource_limits( uint64_t account, int64_t* ram_bytes, int64_t* net_weight, int64_t* cpu_weight );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("set_resource_limits"))) 
          void set_resource_limits( uint64_t account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("set_privileged"))) 
          void set_privileged( uint64_t account, bool is_priv );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("set_blockchain_parameters_packed"))) 
          void set_blockchain_parameters_packed( char* data, uint32_t datalen );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("get_blockchain_parameters_packed"))) 
          uint32_t get_blockchain_parameters_packed( char* data, uint32_t datalen );
 
-         __attribute((eosio_wasm_import))
+         __attribute__((import_name("set_kv_parameters_packed"))) 
+         void set_kv_parameters_packed( const char* data, uint32_t datalen );
+
+         __attribute__((import_name("set_proposed_producers"))) 
          int64_t set_proposed_producers( char*, uint32_t );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("preactivate_feature"))) 
          void preactivate_feature( const capi_checksum256* feature_digest );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("set_proposed_producers_ex")))
          int64_t set_proposed_producers_ex( uint64_t producer_data_format, char *producer_data, uint32_t producer_data_size );
+
+         __attribute__((import_name("set_wasm_parameters_packed")))
+         void set_wasm_parameters_packed(const char* data, uint32_t datalen);
+
+         __attribute__((import_name("set_parameters_packed")))
+         void set_parameters_packed(const char* data, uint32_t datalen);
+
+         __attribute__((import_name("get_parameters_packed")))
+         uint32_t get_parameters_packed(const char* ids, uint32_t ids_size, char* params, uint32_t params_size);
+
+         __attribute__((import_name("get_kv_parameters_packed")))
+         uint32_t get_kv_parameters_packed(void* params, uint32_t size, uint32_t max_version);
+
+         __attribute__((import_name("set_resource_limit"))) 
+         void set_resource_limit(int64_t, int64_t, int64_t);
+
       }
    }
 
@@ -52,8 +71,8 @@ namespace eosio {
    struct blockchain_parameters {
 
       /**
-      * The maxiumum net usage in instructions for a block
-      * @brief the maxiumum net usage in instructions for a block
+      * The maximum net usage in instructions for a block
+      * @brief the maximum net usage in instructions for a block
       */
       uint64_t max_block_net_usage;
 
@@ -93,8 +112,8 @@ namespace eosio {
       uint32_t context_free_discount_net_usage_den;
 
       /**
-      * The maxiumum billable cpu usage (in microseconds) for a block
-      * @brief The maxiumum billable cpu usage (in microseconds) for a block
+      * The maximum billable cpu usage (in microseconds) for a block
+      * @brief The maximum billable cpu usage (in microseconds) for a block
       */
       uint32_t max_block_cpu_usage;
 
@@ -182,6 +201,54 @@ namespace eosio {
     *  @param params - It will be replaced with the retrieved blockchain params
     */
    void get_blockchain_parameters(eosio::blockchain_parameters& params);
+
+   /**
+    *  Tunable KV configuration that can be changed via consensus
+    *  @ingroup privileged
+    */
+   struct kv_parameters {
+      /**
+      * The maximum key size
+      * @brief The maximum key size
+      */
+      uint32_t max_key_size;
+
+      /**
+      * The maximum value size
+      * @brief The maximum value size
+      */
+      uint32_t max_value_size;
+
+      /**
+       * The maximum number of iterators
+      * @brief The maximum number of iterators
+       */
+      uint32_t max_iterators;
+
+      EOSLIB_SERIALIZE( kv_parameters,
+                        (max_key_size)
+                        (max_value_size)(max_iterators)
+      )
+   };
+
+   /**
+    *  Set the kv parameters
+    *
+    *  @ingroup privileged
+    *  @param params - New kv parameters to set
+    */
+   inline void set_kv_parameters(const eosio::kv_parameters& params) {
+      // set_kv_parameters_packed expects version, max_key_size,
+      // max_value_size, and max_iterators,
+      // while kv_parameters only contains max_key_size, max_value_size,
+      // and max_iterators. That's why we place uint32_t in front
+      // of kv_parameters in buf
+      char buf[sizeof(uint32_t) + sizeof(eosio::kv_parameters)];
+      eosio::datastream<char *> ds( buf, sizeof(buf) );
+      ds << uint32_t(0);  // fill in version
+      ds << params;
+      internal_use_do_not_use::set_kv_parameters_packed( buf, ds.tellp() );
+   }
 
     /**
     *  Get the resource limits of an account
@@ -273,4 +340,40 @@ namespace eosio {
       );
    }
 
+   struct wasm_parameters {
+      uint32_t max_mutable_global_bytes;
+      uint32_t max_table_elements;
+      uint32_t max_section_elements;
+      uint32_t max_linear_memory_init;
+      uint32_t max_func_local_bytes ;
+      uint32_t max_nested_structures;
+      uint32_t max_symbol_bytes;
+      uint32_t max_code_bytes;
+      uint32_t max_module_bytes;
+      uint32_t max_pages;
+      uint32_t max_call_depth;
+
+      EOSLIB_SERIALIZE(wasm_parameters,
+                       (max_mutable_global_bytes) //
+                       (max_table_elements)       //
+                       (max_section_elements)     //
+                       (max_linear_memory_init)   //
+                       (max_func_local_bytes)     //
+                       (max_nested_structures)    //
+                       (max_symbol_bytes)         //
+                       (max_code_bytes)           //
+                       (max_module_bytes)         //
+                       (max_pages)                //
+                       (max_call_depth))
+   };
+
+   inline void set_wasm_parameters(const eosio::wasm_parameters& params) {
+      // set_wasm_parameters_packed expects version
+      char buf[sizeof(uint32_t) + sizeof(eosio::wasm_parameters)];
+
+      eosio::datastream<char*> ds(buf, sizeof(buf));
+      ds << uint32_t(0); // fill in version
+      ds << params;
+      internal_use_do_not_use::set_wasm_parameters_packed(buf, ds.tellp());
+   }
 }

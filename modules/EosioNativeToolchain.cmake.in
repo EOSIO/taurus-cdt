@@ -1,0 +1,20 @@
+
+get_filename_component(real_current_list_file "${CMAKE_CURRENT_LIST_FILE}" REALPATH)
+get_filename_component(real_current_list_dir "${real_current_list_file}" DIRECTORY)
+get_filename_component(CMAKE_FIND_ROOT_PATH "${real_current_list_dir}/../../.." ABSOLUTE)
+
+message(STATUS "Setting up Eosio Native Toolchain @EOSIO_CDT_VERSION@ at ${CMAKE_FIND_ROOT_PATH}")
+
+set(CMAKE_C_COMPILER "@LLVM_INSTALL_PREFIX@/bin/clang")
+set(CMAKE_CXX_COMPILER "@LLVM_INSTALL_PREFIX@/bin/clang++")
+
+
+set(EOSIO_C_OPTIONS -fno-threadsafe-statics)
+set(EOSIO_CXX_OPTIONS "${EOSIO_C_OPTIONS} -std=c++20 -stdlib=libc++ -I@LLVM_INSTALL_PREFIX@/include")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-attributes ${EOSIO_C_OPTIONS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-attributes ${EOSIO_CXX_OPTIONS}")
+if (APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS    "-L@LLVM_INSTALL_PREFIX@/lib -Wl,-rpath,@LLVM_INSTALL_PREFIX@/lib")
+    set(CMAKE_MODULE_LINKER_FLAGS "-L@LLVM_INSTALL_PREFIX@/lib -Wl,-rpath,@LLVM_INSTALL_PREFIX@/lib")
+    set(CMAKE_SHARED_LINKER_FLAGS "-L@LLVM_INSTALL_PREFIX@/lib -Wl,-rpath,@LLVM_INSTALL_PREFIX@/lib")
+endif()

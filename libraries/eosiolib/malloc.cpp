@@ -1,9 +1,9 @@
-#include <cstdlib> 
+#include <cstdlib>
 #include <alloca.h>
 #include <eosio/check.hpp>
 #include <eosio/print.hpp>
 
-#ifdef EOSIO_NATIVE
+#ifndef __wasm__
    extern "C" {
       size_t _current_memory();
       size_t _grow_memory(size_t);
@@ -11,8 +11,8 @@
 #define CURRENT_MEMORY _current_memory()
 #define GROW_MEMORY(X) _grow_memory(X)
 #else
-#define CURRENT_MEMORY __builtin_wasm_current_memory() 
-#define GROW_MEMORY(X) __builtin_wasm_grow_memory(X)
+#define CURRENT_MEMORY __builtin_wasm_memory_size(0)
+#define GROW_MEMORY(X) __builtin_wasm_memory_grow(0, X)
 #endif
 
 namespace eosio {
@@ -46,7 +46,7 @@ namespace eosio {
          }
 
          sbrk_bytes += num_bytes;
-#ifdef EOSIO_NATIVE
+#ifndef __wasm__
       return reinterpret_cast<void*>((char*)__get_heap_base()+prev_num_bytes);
 #else
       return reinterpret_cast<void*>(prev_num_bytes);
@@ -520,7 +520,7 @@ namespace eosio {
       size_t _active_free_heap;
       static const size_t _alloc_memory_mask = size_t(1) << 31;
    };
-   
+
    memory_manager memory_heap;
 } /// namespace eosio
 

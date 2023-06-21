@@ -2,6 +2,8 @@
 
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <eosio/reflection.hpp>
+#include <utility>
+#include <concepts>
 
 #define EOSLIB_REFLECT_MEMBER_OP( r, STRUCT, elem ) \
   EOSIO_REFLECT_MEMBER(STRUCT, elem);
@@ -43,3 +45,49 @@
     eosio_for_each_field((BASE*)nullptr, f);                            \
     BOOST_PP_SEQ_FOR_EACH(EOSLIB_REFLECT_MEMBER_OP, ~, MEMBERS);        \
   }
+
+
+namespace eosio {
+  template <typename T>
+    struct pb : T {
+    using pb_message_type = T;
+    pb() = default;
+    pb(const T& v) : T(v) {}
+    pb(T&& v) : T(std::move(v)) {}
+    pb(const pb<T>& v) = default;
+    pb(pb<T>&& v) = default;
+
+    pb<T>& operator = (const pb<T>& v) = default;
+    pb<T>& operator = (pb<T>&& v) = default;
+
+    template <typename ...Args>
+    pb(Args&& ...args): T(std::forward<Args>(args)...) {}
+
+    bool operator == (const pb<T>&) const = default;
+  };
+
+  template <typename T>
+  const pb<T>& to_pb(const T& v) {
+    return static_cast<const pb<T>&>(v);
+  }
+
+  template <typename T>
+  T& from_pb(pb<T>& v) {
+    return v;
+  }
+
+  template <typename T>
+  const T& from_pb(const pb<T>& v) {
+    return v;
+  }
+
+  template <typename T>
+  T& from_pb(std::tuple<pb<T>>& v) {
+    return std::get<0>(v);
+  }
+
+  template <typename T>
+  const T& from_pb(const std::tuple<pb<T>>& v) {
+    return std::get<0>(v);
+  }
+}

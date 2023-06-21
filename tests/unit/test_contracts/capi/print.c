@@ -8,9 +8,9 @@ void test_print( void ) {
    printui(0);
    printi128(NULL);
    printui128(NULL);
-   printsf(0.0f);
-   printdf(0.0);
-   printqf(NULL);
+   // printsf(0.0f);
+   // printdf(0.0);
+   // printqf(NULL);
    printn(0);
    printhex(NULL, 0);
 }

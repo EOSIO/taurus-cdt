@@ -1,0 +1,33 @@
+ 
+syntax = "proto3";
+package ms;
+
+message monster {
+  enum Color {
+    red = 0;
+    blue = 1;
+    green = 300;
+  }
+
+  message vec3 {
+    int32 x = 1;
+    uint32 y = 2;
+    uint64 z = 3;
+  }
+
+  message weapon {
+    string name = 1;
+    sfixed32 damage = 2;
+  };
+
+  vec3 pos = 1;
+  sfixed32 mana = 2;
+  sfixed64 hp = 3;
+  string name = 4;
+  bytes inventory = 5;
+  Color color = 6;
+  repeated weapon weapons = 7;
+  weapon equipped = 8;
+  repeated vec3 path = 9;
+  bool boss = 10;
+};

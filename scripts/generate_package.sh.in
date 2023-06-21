@@ -1,13 +1,20 @@
 #! /bin/bash
 
 VARIANT=$1
+if [[ ${VARIANT} == "deb" ]]; then
+    if [ -z "$2" ]; then
+        echo "Error, OS argument missing for deb package type"
+        exit -1
+    else
+        OS=$2
+    fi
+fi
 
 VERSION_NO_SUFFIX="@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@"
 VERSION_SUFFIX="@VERSION_SUFFIX@"
 VERSION="@VERSION_FULL@"
 
-# Using CMAKE_BINARY_DIR uses an absolute path and will break cross-vm building/download/make functionality
-BUILD_DIR="../../build"
+BUILD_DIR="@CMAKE_BINARY_DIR@"
 
 VENDOR="@VENDOR@"
 PROJECT="@PROJECT_NAME@"
@@ -25,17 +32,13 @@ export DESC
 export URL
 export EMAIL
 
-mkdir -p tmp
+NAME="${PROJECT}_${VERSION_NO_SUFFIX}-${RELEASE:-1}-${OS}"
 
-if [[ ${VARIANT} == "brew" ]]; then
-   . ./generate_bottle.sh
-elif [[ ${VARIANT} == "deb" ]]; then
-   . ./generate_deb.sh
+if [[ ${VARIANT} == "deb" ]]; then
+   cpack --config $BUILD_DIR/CPackConfig.cmake -G DEB -D CPACK_PACKAGE_FILE_NAME="${NAME}_amd64"
 elif [[ ${VARIANT} == "rpm" ]]; then
-   . ./generate_rpm.sh
+   cpack --config $BUILD_DIR/CPackConfig.cmake -G RPM -D CPACK_PACKAGE_FILE_NAME="${NAME}.x86_64"
 else
-   echo "Error, unknown package type. Use either ['brew', 'deb', 'rpm']."
+   echo "Error, unknown package type. Use either ['deb', 'rpm']."
    exit -1
 fi
-
-rm -r tmp || exit 1

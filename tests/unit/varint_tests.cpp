@@ -5,7 +5,7 @@
 
 #include <limits>
 
-#include <eosio/tester.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/datastream.hpp>
 #include <eosio/varint.hpp>
 

@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include_next <eosio/fixed_bytes.hpp>
+#include <eosio/abieos_fixed_bytes.hpp>
 #include "print.hpp"
 
 namespace eosio {

@@ -18,7 +18,7 @@ extern "C" {
  * @param net_weight - pointer to `int64_t` to hold net limit
  * @param cpu_weight - pointer to `int64_t` to hold cpu limit
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("get_resource_limits")))
 void get_resource_limits( capi_name account, int64_t* ram_bytes, int64_t* net_weight, int64_t* cpu_weight );
 
 /**
@@ -29,7 +29,7 @@ void get_resource_limits( capi_name account, int64_t* ram_bytes, int64_t* net_we
  * @param net_weight - fractionally proportionate net limit of available resources based on (weight / total_weight_of_all_accounts)
  * @param cpu_weight - fractionally proportionate cpu limit of available resources based on (weight / total_weight_of_all_accounts)
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("set_resource_limits")))
 void set_resource_limits( capi_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
 
 /**
@@ -43,7 +43,7 @@ void set_resource_limits( capi_name account, int64_t ram_bytes, int64_t net_weig
  *
  * @return -1 if proposing a new producer schedule was unsuccessful, otherwise returns the version of the new proposed schedule
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("set_proposed_producers")))
 int64_t set_proposed_producers( char *producer_data, uint32_t producer_data_size );
 
 /**
@@ -60,7 +60,7 @@ int64_t set_proposed_producers( char *producer_data, uint32_t producer_data_size
  *
  * @return -1 if proposing a new producer schedule was unsuccessful, otherwise returns the version of the new proposed schedule
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("set_proposed_producers_ex")))
 int64_t set_proposed_producers_ex( uint64_t producer_data_format, char *producer_data, uint32_t producer_data_size );
 
 
@@ -71,7 +71,7 @@ int64_t set_proposed_producers_ex( uint64_t producer_data_format, char *producer
  * @return true if the account is privileged
  * @return false if the account is not privileged
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("is_privileged")))
 bool is_privileged( capi_name account );
 
 /**
@@ -80,7 +80,7 @@ bool is_privileged( capi_name account );
  * @param account - name of the account whose privileged account to be set
  * @param is_priv - privileged status
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("set_privileged")))
 void set_privileged( capi_name account, bool is_priv );
 
 /**
@@ -90,7 +90,7 @@ void set_privileged( capi_name account, bool is_priv );
  * @param datalen - size of the packed blockchain parameters
  * @pre `data` is a valid pointer to a range of memory at least `datalen` bytes long that contains packed blockchain params data
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("set_blockchain_parameters_packed")))
 void set_blockchain_parameters_packed( char* data, uint32_t datalen );
 
 /**
@@ -102,15 +102,25 @@ void set_blockchain_parameters_packed( char* data, uint32_t datalen );
  * @pre `data` is a valid pointer to a range of memory at least `datalen` bytes long
  * @post `data` is filled with packed blockchain parameters
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("get_blockchain_parameters_packed")))
 uint32_t get_blockchain_parameters_packed( char* data, uint32_t datalen );
+
+/**
+ * Set the KV parameters
+ *
+ * @param data - pointer to KV parameters packed as bytes
+ * @param datalen - size of the packed KV parameters
+ * @pre `data` is a valid pointer to a range of memory at least `datalen` bytes long that contains packed KV params data
+ */
+__attribute__((import_name("set_kv_parameters_packed")))
+void set_kv_parameters_packed( const char* data, uint32_t datalen );
 
 /**
  * Pre-activate protocol feature
  *
  * @param feature_digest - digest of the protocol feature to pre-activate
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("preactivate_feature")))
 void preactivate_feature( const struct capi_checksum256* feature_digest );
 
 #ifdef __cplusplus

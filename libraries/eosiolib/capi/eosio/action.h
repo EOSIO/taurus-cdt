@@ -73,7 +73,7 @@ extern "C" {
  *  @pre `msg` is a valid pointer to a range of memory at least `len` bytes long
  *  @post `msg` is filled with packed action data
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("read_action_data")))
 uint32_t read_action_data( void* msg, uint32_t len );
 
 /**
@@ -82,7 +82,7 @@ uint32_t read_action_data( void* msg, uint32_t len );
  * @brief Get the length of current action's data field
  * @return the length of the current action's data field
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("action_data_size")))
 uint32_t action_data_size( void );
 
 /**
@@ -91,7 +91,7 @@ uint32_t action_data_size( void );
  *  @brief Add the specified account to set of accounts to be notified
  *  @param name - name of the account to be verified
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("require_recipient")))
 void require_recipient( capi_name name );
 
 /**
@@ -100,7 +100,7 @@ void require_recipient( capi_name name );
  *  @brief Verify specified account exists in the set of provided auths
  *  @param name - name of the account to be verified
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("require_auth")))
 void require_auth( capi_name name );
 
  /**
@@ -109,7 +109,7 @@ void require_auth( capi_name name );
  *  @brief Verifies that name has auth.
  *  @param name - name of the account to be verified
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("has_auth")))
 bool has_auth( capi_name name );
 
 /**
@@ -119,7 +119,7 @@ bool has_auth( capi_name name );
  *  @param name - name of the account to be verified
  *  @param permission - permission level to be verified
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("require_auth2")))
 void require_auth2( capi_name name, capi_name permission );
 
 /**
@@ -128,7 +128,7 @@ void require_auth2( capi_name name, capi_name permission );
  *  @brief Verifies that @ref name is an existing account.
  *  @param name - name of the account to check
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("is_account")))
 bool is_account( capi_name name );
 
 /**
@@ -138,8 +138,8 @@ bool is_account( capi_name name );
  *  @param size - size of serialized action in bytes
  *  @pre `serialized_action` is a valid pointer to an array at least `size` bytes long
  */
-__attribute__((eosio_wasm_import))
-void send_inline(char *serialized_action, size_t size);
+__attribute__((import_name("send_inline")))
+void send_inline(char *serialized_action, uint32_t size);
 
 /**
  * /function
@@ -149,15 +149,15 @@ void send_inline(char *serialized_action, size_t size);
  *  @param size - size of serialized action in bytes
  *  @pre `serialized_action` is a valid pointer to an array at least `size` bytes long
  */
-__attribute__((eosio_wasm_import))
-void send_context_free_inline(char *serialized_action, size_t size);
+__attribute__((import_name("send_context_free_inline")))
+void send_context_free_inline(char *serialized_action, uint32_t size);
 
 /**
  *  Returns the time in microseconds from 1970 of the publication_time
  *  @brief Get the publication time
  *  @return the time in microseconds from 1970 of the publication_time
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("publication_time")))
 uint64_t  publication_time( void );
 
 /**
@@ -165,7 +165,7 @@ uint64_t  publication_time( void );
  *  @brief Get the current receiver of the action
  *  @return the account which specifies the current receiver of the action
  */
-__attribute__((eosio_wasm_import))
+__attribute__((import_name("current_receiver")))
 capi_name current_receiver( void );
 
 /**
@@ -175,8 +175,8 @@ capi_name current_receiver( void );
  * @param size - size of serialized return value in bytes
  * @pre `return_value` is a valid pointer to an array at least `size` bytes long
  */
-__attribute__((eosio_wasm_import))
-void set_action_return_value(void *return_value, size_t size);
+__attribute__((import_name("set_action_return_value")))
+void set_action_return_value(void *return_value, uint32_t size);
 
 /// @} action
 

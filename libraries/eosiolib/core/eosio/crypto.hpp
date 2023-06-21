@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include_next <eosio/crypto.hpp>
+#include <eosio/abieos_crypto.hpp>
 #include <eosio/fixed_bytes.hpp>
 
 namespace eosio {
@@ -118,4 +118,114 @@ namespace eosio {
     *  @param pubkey - Public key
     */
    void assert_recover_key( const eosio::checksum256& digest, const eosio::signature& sig, const eosio::public_key& pubkey );
+
+
+   /**
+    * @ingroup crypto
+    * @param msg - Message
+    * @param msglen - Message length
+    * @param sig - Signature in hex string format
+    * @param sig - Signature length
+    * @param exp - Public exponent in hex string format
+    * @param explen - Public exponent length
+    * @param mod - Modulus in hex string format
+    * @param modlen - Modulus length
+    * @return bool - If the signature matches the message and RSA public key represented by modulus and exponent, return true; otherwise, return false
+    */
+   bool verify_rsa_sha256_sig( const char* msg, uint32_t msg_len, const char* sig, uint32_t sig_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len);
+
+   /**
+    * @ingroup crypto
+    * @param msg - Message in hex string format
+    * @param sig - Signature in hex string format
+    * @param exp - Public exponent in hex string format
+    * @param mod - Modulus
+    * @return bool - If the signature matches the message and RSA public key represented by modulus and exponent, return true; otherwise, return false
+    */
+   bool verify_rsa_sha256_sig( const std::string& msg, const std::string& sig, const std::string& exp, const std::string& mod );
+
+   /**
+    * @ingroup crypto
+    * @param msg - Message
+    * @param msg_len - Message length
+    * @param sig - Signature in Base64 encoding format
+    * @param sig_len - Signature length
+    * @param pubkey - RSA public key in X.509 SubjectPublicKeyInfo format, PEM encoded
+    * @param pubkey_len - Public key length
+    * @return bool - If the signature matches the message and RSA public key, return true; otherwise, return false
+    */
+   bool verify_rsa_sha256_sig( const char* msg, uint32_t msg_len, const char* sig, uint32_t sig_len, const char* pubkey, uint32_t pubkey_len );
+
+   /**
+    * @ingroup crypto
+    * @param msg - Message
+    * @param sig - Signature in Base64 encoding format
+    * @param key - RSA public key in X.509 SubjectPublicKeyInfo format, PEM encoded
+    * @return bool - If the signature matches the message and public key, return true; otherwise, return false
+    */
+   bool verify_rsa_sha256_sig( const std::string& msg, const std::string& sig, const std::string& pubkey );
+
+   /**
+    * @ingroup crypto
+    * @param key - RSA public key PEM string
+    * @return bool - If the key string is supported by CDT/taurus-node (currently X.509 SubjectPublicKeyInfo format, PEM encoded), return true; otherwise, return false
+    */    
+   bool is_supported_rsa_pubkey(const std::string& pubkey);
+
+   bool is_supported_rsa_pubkey(const char* pubkey, uint32_t pubkey_len);
+
+   /**
+    * @ingroup crypto
+    * @param msg - Message
+    * @param msg_len - Message length
+    * @param sig - Signature in ASN.1 DER format, base64 encoded
+    * @param sig_len - Signature length
+    * @param pubkey - ECDSA public key in X.509 SubjectPublicKeyInfo format, PEM encoded
+    * @param pubkey_len - Public key length
+    * @return bool - If the signature matches the message and ECDSA public key, return true; otherwise, return false
+    */
+   bool verify_ecdsa_sig( const char* msg, uint32_t msg_len, const char* sig, uint32_t sig_len, const char* pubkey, uint32_t pubkey_len );
+
+   bool verify_ecdsa_sig( const std::string& msg, const std::string& sig, const std::string& pubkey );
+
+   /**
+    * @ingroup crypto
+    * @param pubkey - ECDSA public key char array pointer
+    * @param pubkey_len - ECDSA public key char array length
+    * @return bool - If the key string is supported by CDT/taurus-node (currently X.509 SubjectPublicKeyInfo format, PEM encoded), return true; otherwise, return false
+    */
+   bool is_supported_ecdsa_pubkey( const char* pubkey, uint32_t pubkey_len );
+
+   bool is_supported_ecdsa_pubkey( const std::string& pubkey );
+
+
+   auto pb_serialize(auto& archive, const public_key& v) {
+      return archive(public_key_to_string(v));
+   }
+
+   auto pb_serialize(auto& archive, public_key& v) {
+      auto data = archive.remaining_data();
+      v = public_key_from_string(std::string{ (const char*)data.data(), data.size()});  
+      return std::errc{};
+   }
+
+   auto pb_serialize(auto& archive, const private_key& v) {
+      return archive(private_key_to_string(v));
+   }
+
+   auto pb_serialize(auto& archive, private_key& v) {
+      auto data = archive.remaining_data();
+      v = private_key_from_string(std::string{ (const char*)data.data(), data.size()});  
+      return std::errc{};
+   }
+
+   auto pb_serialize(auto& archive, const signature& v) {
+      return archive(signature_to_string(v));
+   }
+
+   auto pb_serialize(auto& archive, signature& v) {
+      auto data = archive.remaining_data();
+      v = signature_from_string(std::string{ (const char*)data.data(), data.size()});  
+      return std::errc{};
+   }
 }

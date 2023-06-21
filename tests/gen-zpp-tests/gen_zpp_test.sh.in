@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+export PATH=@CMAKE_BINARY_DIR@/bin:$PATH
+
+protoc -I @CMAKE_CURRENT_SOURCE_DIR@ -I ../../include -I @Protobuf_INCLUDE_DIR@  --plugin=../../bin/protoc-gen-zpp --zpp_out $PWD "$@"
+
+for f in "$@"; do
+    header=${f%.proto}.pb.hpp
+    echo comparing @CMAKE_CURRENT_SOURCE_DIR@/${header} and ${PWD}/${header}
+    diff @CMAKE_CURRENT_SOURCE_DIR@/${header} ./${header}
+done

@@ -1,0 +1,207 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.3",
+    "types": [
+        {
+            "new_type_name": "ecc_public_key",
+            "type": "int8[33]"
+        },
+        {
+            "new_type_name": "optional_float32",
+            "type": "float32?"
+        }
+    ],
+    "structs": [
+        {
+            "name": "my_struct",
+            "base": "",
+            "fields": [
+                {
+                    "name": "primary_key",
+                    "type": "name"
+                },
+                {
+                    "name": "foo",
+                    "type": "string"
+                },
+                {
+                    "name": "bar",
+                    "type": "uint64"
+                },
+                {
+                    "name": "fullname",
+                    "type": "string"
+                },
+                {
+                    "name": "age",
+                    "type": "uint32"
+                },
+                {
+                    "name": "a",
+                    "type": "pair_int32_int32"
+                },
+                {
+                    "name": "b",
+                    "type": "float32?"
+                },
+                {
+                    "name": "c",
+                    "type": "float64[]"
+                },
+                {
+                    "name": "d",
+                    "type": "int32[]"
+                },
+                {
+                    "name": "e",
+                    "type": "variant_int32_bool_float32"
+                },
+                {
+                    "name": "f",
+                    "type": "bytes"
+                },
+                {
+                    "name": "g",
+                    "type": "pair_uint64_uint32[]"
+                },
+                {
+                    "name": "h",
+                    "type": "optional_float32[]"
+                },
+                {
+                    "name": "i",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "j",
+                    "type": "ecc_public_key"
+                },
+                {
+                    "name": "k",
+                    "type": "variant_checksum160_checksum256_checksum512"
+                },
+                {
+                    "name": "l",
+                    "type": "public_key"
+                },
+                {
+                    "name": "m",
+                    "type": "private_key"
+                },
+                {
+                    "name": "n",
+                    "type": "signature"
+                },
+                {
+                    "name": "o",
+                    "type": "block_timestamp_type"
+                },
+                {
+                    "name": "non_unique_name",
+                    "type": "tuple_string_uint32"
+                }
+            ]
+        },
+        {
+            "name": "noop",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "pair_int32_int32",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first",
+                    "type": "int32"
+                },
+                {
+                    "name": "second",
+                    "type": "int32"
+                }
+            ]
+        },
+        {
+            "name": "pair_uint64_uint32",
+            "base": "",
+            "fields": [
+                {
+                    "name": "first",
+                    "type": "uint64"
+                },
+                {
+                    "name": "second",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "tuple_string_uint32",
+            "base": "",
+            "fields": [
+                {
+                    "name": "field_0",
+                    "type": "string"
+                },
+                {
+                    "name": "field_1",
+                    "type": "uint32"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "noop",
+            "type": "noop",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": [
+        {
+            "name": "variant_checksum160_checksum256_checksum512",
+            "types": ["checksum160","checksum256","checksum512"]
+        },
+        {
+            "name": "variant_int32_bool_float32",
+            "types": ["int32","bool","float32"]
+        }
+    ],
+    "kv_tables": {
+        "testtable": {
+            "type": "my_struct",
+            "primary_index": {
+                "name": "primarykey",
+                "type": "name"
+            },
+            "secondary_indices": {
+                "foo": {
+                    "type": "string"
+                },
+                "bar": {
+                    "type": "uint64"
+                },
+                "nonuniqnme": {
+                    "type": "tuple_string_uint32"
+                },
+                "age": {
+                    "type": "uint32"
+                },
+                "pubk": {
+                    "type": "public_key"
+                },
+                "privk": {
+                    "type": "private_key"
+                },
+                "signature": {
+                    "type": "signature"
+                },
+                "checksum": {
+                    "type": "checksum256"
+                }
+            }
+        }
+    }
+}

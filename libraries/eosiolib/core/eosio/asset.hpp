@@ -1,6 +1,6 @@
 #pragma once
 
-#include_next <eosio/asset.hpp>
+#include <eosio/abieos_asset.hpp>
 #include <eosio/print.hpp>
 
 namespace eosio {

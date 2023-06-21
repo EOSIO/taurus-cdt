@@ -1,0 +1,95 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.3",
+    "types": [
+        {
+            "new_type_name": "any_array",
+            "type": "anyvar[]"
+        },
+        {
+            "new_type_name": "any_object",
+            "type": "entry[]"
+        },
+        {
+            "new_type_name": "value_type",
+            "type": "variant_int64_entry_array_anyvar_array"
+        }
+    ],
+    "structs": [
+        {
+            "name": "anyvar",
+            "base": "",
+            "fields": [
+                {
+                    "name": "_value",
+                    "type": "value_type"
+                }
+            ]
+        },
+        {
+            "name": "entry",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "anyvar"
+                }
+            ]
+        },
+        {
+            "name": "find",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "greeting",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "o",
+                    "type": "any_object"
+                },
+                {
+                    "name": "a",
+                    "type": "any_array"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "find",
+            "type": "find",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "greeting",
+            "type": "greeting",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": [
+        {
+            "name": "variant_int64_entry_array_anyvar_array",
+            "types": ["int64","entry[]","anyvar[]"]
+        }
+    ]
+}

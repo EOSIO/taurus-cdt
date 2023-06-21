@@ -1,0 +1,21 @@
+syntax = "proto3";
+import "zpp/zpp_options.proto";
+
+package test;
+
+// a simple one
+enum Capability {
+  ADD_API_KEY = 0;
+  MARGIN = 1;
+  SPOT = 2;
+  DEPOSIT = 3;
+  WITHDRAWAL = 4;
+}
+
+message AddApiKeyInput {
+  uint64 account_id = 1;
+  string public_key = 2 [(zpp_optional)= true, (zpp_type)="eosio::public_key"];
+  bytes ip_whitelist_commitment = 3;
+  repeated Capability capabilities = 4;
+  uint64 role_id = 5;
+}

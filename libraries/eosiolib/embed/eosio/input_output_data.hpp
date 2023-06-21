@@ -8,8 +8,9 @@
 namespace eosio {
 
 namespace internal_use_do_not_use {
-extern "C" [[eosio::wasm_import]] uint32_t get_input_data(void* dest, uint32_t size);
-extern "C" [[eosio::wasm_import]] void     set_output_data(const void* data, uint32_t size);
+extern "C" [[clang::import_name("get_input_data")]] uint32_t get_input_data(void* dest, uint32_t size);
+extern "C" [[clang::import_name("set_output_data")]] void     set_output_data(const void* data, uint32_t size);
+extern "C" [[clang::import_name("push_data")]] void     push_data(const void* data, uint32_t size);
 } // namespace internal_use_do_not_use
 
 inline std::vector<char> get_input_data() {

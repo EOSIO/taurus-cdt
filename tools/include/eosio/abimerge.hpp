@@ -2,19 +2,24 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wcovered-switch-default"
-#include <jsoncons/json.hpp>
-#include "abi.hpp"
+#endif
 
 #include <string>
 #include <vector>
 
-using jsoncons::json;
+#include <jsoncons/json.hpp>
+
 using jsoncons::ojson;
 
 class ABIMerger {
    public:
-      ABIMerger(ojson a) : abi(a) {}
+      ABIMerger(ojson a, int version_major, int version_minor) : abi(a) {
+         if (abi.empty()) {
+            abi["version"] = std::string("eosio::abi/")+std::to_string(version_major)+"."+std::to_string(version_minor);
+         }
+      }
       void set_abi(ojson a) {
          abi = a;
       }
@@ -25,17 +30,20 @@ class ABIMerger {
       }
       ojson merge(ojson other) {
          ojson ret;
-         ret["____comment"] = abi["____comment"];
-         ret["version"]  = merge_version(other);
+         ret["____comment"] = "This file was generated with eosio-abigen. DO NOT EDIT ";
+         std::string vers = merge_version(other);
+         ret["version"]  = vers;
          ret["types"]    = merge_types(other);
          ret["structs"]  = merge_structs(other);
          ret["actions"]  = merge_actions(other);
          ret["tables"]   = merge_tables(other);
          ret["ricardian_clauses"]  = merge_clauses(other);
          ret["variants"] = merge_variants(other);
-         std::string vers = abi["version"].as<std::string>();
          if (std::stod(vers.substr(vers.size()-3))*10 >= 12) {
-            ret["action_results"] = merge_action_results(other);
+            auto x = merge_kv_tables(other);
+            if (!x.empty()) ret["kv_tables"] = x;
+            x = merge_action_results(other);
+            if (!x.empty()) ret["action_results"] = x;
          }
          return ret;
       }
@@ -115,13 +123,15 @@ class ABIMerger {
       }
 
       template <typename F>
-      void add_object(ojson& ret, ojson a, ojson b, std::string type, std::string id, F&& is_same_func) {
-         for (auto obj_a : a[type].array_range()) {
+      void add_object_to_array(ojson& ret, ojson a, ojson b, std::string type, std::string id, F&& is_same_func) {
+         ojson aa = a.get_with_default(type, ojson(jsoncons::json_array_arg));
+         ojson bb = b.get_with_default(type, ojson(jsoncons::json_array_arg));
+         for (auto obj_a : aa.array_range()) {
             ret.push_back(obj_a);
          }
-         for (auto obj_b : b[type].array_range()) {
+         for (auto obj_b : bb.array_range()) {
             bool should_skip = false;
-            for (auto obj_a : a[type].array_range()) {
+            for (auto obj_a : aa.array_range()) {
                if (obj_a[id] == obj_b[id]) {
                   if (!is_same_func(obj_a, obj_b)) {
                      throw std::runtime_error(std::string("Error, ABI structs malformed : ")+obj_a[id].as<std::string>()+" already defined");
@@ -135,45 +145,76 @@ class ABIMerger {
          }
       }
 
+      void add_object_to_object(ojson& ret, ojson a, ojson b, std::string type, std::string id) {
+         ojson aa = a.get_with_default(type, ojson());
+         ojson bb = b.get_with_default(type, ojson());
+
+         for (auto obj_a : aa.object_range()) {
+            ret.insert_or_assign(obj_a.key(), obj_a.value());
+         }
+         for (auto obj_b : bb.object_range()) {
+            bool should_skip = false;
+            for (auto obj_a : aa.object_range()) {
+               if (obj_a.key() == obj_b.key()) {
+                  if (obj_a.value() != obj_b.value()) {
+                     throw std::runtime_error(std::string("Error, ABI structs malformed : ")+std::string(obj_a.key().data(), obj_a.key().size())+" already defined");
+                  }
+                  else {
+                     should_skip = true;
+                  }
+               }
+            }
+            if (!should_skip) {
+               ret.insert_or_assign(obj_b.key(), obj_b.value());
+            }
+         }
+      }
+
       ojson merge_structs(ojson b) {
          ojson structs = ojson::array();
-         add_object(structs, abi, b, "structs", "name", struct_is_same);
+         add_object_to_array(structs, abi, b, "structs", "name", struct_is_same);
          return structs;
       }
 
       ojson merge_types(ojson b) {
          ojson types = ojson::array();
-         add_object(types, abi, b, "types", "new_type_name", type_is_same);
+         add_object_to_array(types, abi, b, "types", "new_type_name", type_is_same);
          return types;
       }
 
       ojson merge_variants(ojson b) {
          ojson vars = ojson::array();
-         add_object(vars, abi, b, "variants", "name", variant_is_same);
+         add_object_to_array(vars, abi, b, "variants", "name", variant_is_same);
          return vars;
       }
 
       ojson merge_actions(ojson b) {
          ojson acts = ojson::array();
-         add_object(acts, abi, b, "actions", "name", action_is_same);
+         add_object_to_array(acts, abi, b, "actions", "name", action_is_same);
          return acts;
       }
 
       ojson merge_tables(ojson b) {
          ojson tabs = ojson::array();
-         add_object(tabs, abi, b, "tables", "name", table_is_same);
+         add_object_to_array(tabs, abi, b, "tables", "name", table_is_same);
          return tabs;
+      }
+
+      ojson merge_kv_tables(ojson b) {
+         ojson kv_tabs = ojson::object();
+         add_object_to_object(kv_tabs, abi, b, "kv_tables", "name");
+         return kv_tabs;
       }
 
       ojson merge_clauses(ojson b) {
          ojson cls = ojson::array();
-         add_object(cls, abi, b, "ricardian_clauses", "id", clause_is_same);
+         add_object_to_array(cls, abi, b, "ricardian_clauses", "id", clause_is_same);
          return cls;
       }
 
       ojson merge_action_results(ojson b) {
          ojson res = ojson::array();
-         add_object(res, abi, b, "action_results", "name", action_result_is_same);
+         add_object_to_array(res, abi, b, "action_results", "name", action_result_is_same);
          return res;
       }
 

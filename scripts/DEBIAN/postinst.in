@@ -1,0 +1,5 @@
+#!/bin/bash
+
+if [ ! -d "@LLVM_TOOLS_BINARY_DIR@" ]; then
+   echo "cannot find llvm @LLVM_VERSION_MARJOR@ installation, you can run 'sudo /usr/@CDT_INSTALL_DIR@/scripts/debian_install_llvm.sh' to install it."
+fi
