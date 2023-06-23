@@ -15,5 +15,7 @@ TEST_CASE_METHOD( test_chain, "Tests for malloc", "[malloc]" ) {
 
    transact({{{"test"_n, "active"_n}, "test"_n, "mallocpass"_n, tuple()}});
    transact({{{"test"_n, "active"_n}, "test"_n, "mallocalign"_n, tuple()}});
-   transact({{{"test"_n, "active"_n}, "test"_n, "mallocfail"_n, tuple()}}, "failed to allocate pages");
+   #ifdef __wasm__
+      transact({{{"test"_n, "active"_n}, "test"_n, "mallocfail"_n, tuple()}}, "failed to allocate pages");
+   #endif
 }

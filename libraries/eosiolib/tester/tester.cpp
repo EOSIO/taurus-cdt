@@ -1,39 +1,61 @@
 #include <eosio/tester.hpp>
 #include <eosio/from_string.hpp>
 
-#define TESTER_INTRINSIC extern "C" __attribute__((eosio_wasm_import))
-
 namespace {
    using cb_alloc_type = void* (*)(void* cb_alloc_data, size_t size);
 
-// clang-format off
-   TESTER_INTRINSIC void     connect_rodeos(uint32_t rodeos, uint32_t chain);
-   TESTER_INTRINSIC uint32_t create_chain(const char* snapshot, uint32_t snapshot_size);
-   TESTER_INTRINSIC uint32_t create_rodeos();
-   TESTER_INTRINSIC void     destroy_chain(uint32_t chain);
-   TESTER_INTRINSIC void     destroy_rodeos(uint32_t rodeos);
-   TESTER_INTRINSIC bool     exec_deferred(uint32_t chain_index, void* cb_alloc_data, cb_alloc_type cb_alloc);
-   TESTER_INTRINSIC int32_t  execute(const char* command, uint32_t command_size);
-   TESTER_INTRINSIC void     finish_block(uint32_t chain_index);
-   TESTER_INTRINSIC uint32_t get_args(char* dest, uint32_t dest_size);
-   TESTER_INTRINSIC uint32_t get_chain_path(uint32_t chain, char* dest, uint32_t dest_size);
-   TESTER_INTRINSIC void     get_head_block_info(uint32_t chain_index, void* cb_alloc_data, cb_alloc_type cb_alloc);
-   TESTER_INTRINSIC uint32_t get_history(uint32_t chain_index, uint32_t block_num, char* dest, uint32_t dest_size);
-   TESTER_INTRINSIC void     push_transaction(uint32_t chain_index, const char* args_packed, uint32_t args_packed_size, void* cb_alloc_data, cb_alloc_type cb_alloc);
-   TESTER_INTRINSIC bool     read_whole_file(const char* filename, uint32_t filename_size, void* cb_alloc_data, cb_alloc_type cb_alloc);
-   TESTER_INTRINSIC void     replace_account_keys(uint32_t chain_index, uint64_t account, uint64_t permission, const char* key, uint32_t key_size);
-   TESTER_INTRINSIC void     replace_producer_keys(uint32_t chain_index, const char* key, uint32_t key_size);
-   TESTER_INTRINSIC void     rodeos_add_filter(uint32_t rodeos, uint64_t name, const char* wasm_filename, uint32_t wasm_filename_size);
-   TESTER_INTRINSIC void     rodeos_enable_queries(uint32_t rodeos, uint32_t max_console_size, uint32_t wasm_cache_size, uint64_t max_exec_time_ms, const char* contract_dir, uint32_t contract_dir_size);
-   TESTER_INTRINSIC uint32_t rodeos_get_num_pushed_data(uint32_t rodeos);
-   TESTER_INTRINSIC uint32_t rodeos_get_pushed_data(uint32_t rodeos, uint32_t index, char* dest, uint32_t dest_size);
-   TESTER_INTRINSIC void     rodeos_push_transaction(uint32_t rodeos, const char* packed_args, uint32_t packed_args_size, void* cb_alloc_data, cb_alloc_type cb_alloc);
-   TESTER_INTRINSIC bool     rodeos_sync_block(uint32_t rodeos);
-   TESTER_INTRINSIC void     select_chain_for_db(uint32_t chain_index);
-   TESTER_INTRINSIC void     shutdown_chain(uint32_t chain);
-   TESTER_INTRINSIC void     start_block(uint32_t chain_index, int64_t skip_miliseconds);
-   TESTER_INTRINSIC uint32_t sign(const void* key, uint32_t keylen, const void* digest, void* sig, uint32_t siglen);
-// clang-format on
+   extern "C" {
+   __attribute__((import_name("connect_rodeos"))) void     connect_rodeos(uint32_t rodeos, uint32_t chain);
+   __attribute__((import_name("create_chain"))) uint32_t   create_chain(const char* snapshot, uint32_t snapshot_size);
+   __attribute__((import_name("create_rodeos"))) uint32_t  create_rodeos();
+   __attribute__((import_name("destroy_chain"))) void      destroy_chain(uint32_t chain);
+   __attribute__((import_name("destroy_rodeos"))) void     destroy_rodeos(uint32_t rodeos);
+   __attribute__((import_name("exec_deferred"))) bool      exec_deferred(uint32_t chain_index, void* cb_alloc_data,
+                                                                         cb_alloc_type cb_alloc);
+   __attribute__((import_name("execute"))) int32_t         execute(const char* command, uint32_t command_size);
+   __attribute__((import_name("finish_block"))) void       finish_block(uint32_t chain_index);
+   __attribute__((import_name("get_args"))) uint32_t       get_args(char* dest, uint32_t dest_size);
+   __attribute__((import_name("get_chain_path"))) uint32_t get_chain_path(uint32_t chain, char* dest,
+                                                                          uint32_t dest_size);
+   __attribute__((import_name("get_head_block_info"))) void
+   get_head_block_info(uint32_t chain_index, void* cb_alloc_data, cb_alloc_type cb_alloc);
+   __attribute__((import_name("get_history"))) uint32_t  get_history(uint32_t chain_index, uint32_t block_num,
+                                                                     char* dest, uint32_t dest_size);
+   __attribute__((import_name("push_transaction"))) void push_transaction(uint32_t chain_index, const char* args_packed,
+                                                                          uint32_t args_packed_size,
+                                                                          void* cb_alloc_data, cb_alloc_type cb_alloc);
+   __attribute__((import_name("read_whole_file"))) bool  read_whole_file(const char* filename, uint32_t filename_size,
+                                                                         void* cb_alloc_data, cb_alloc_type cb_alloc);
+   __attribute__((import_name("read_abi_file"))) bool  read_abi_file(const char* filename, uint32_t filename_size,
+                                                                         void* cb_alloc_data, cb_alloc_type cb_alloc);
+   __attribute__((import_name("replace_account_keys"))) void  replace_account_keys(uint32_t chain_index,
+                                                                                   uint64_t account, uint64_t permission,
+                                                                                   const char* key, uint32_t key_size);
+   __attribute__((import_name("replace_producer_keys"))) void replace_producer_keys(uint32_t    chain_index,
+                                                                                    const char* key, uint32_t key_size);
+   __attribute__((import_name("rodeos_add_filter"))) void
+   rodeos_add_filter(uint32_t rodeos, uint64_t name, const char* wasm_filename, uint32_t wasm_filename_size);
+   __attribute__((import_name("rodeos_enable_queries"))) void
+   rodeos_enable_queries(uint32_t rodeos, uint32_t max_console_size, uint32_t wasm_cache_size,
+                         uint64_t max_exec_time_ms, const char* contract_dir, uint32_t contract_dir_size);
+   __attribute__((import_name("rodeos_get_num_pushed_data"))) uint32_t rodeos_get_num_pushed_data(uint32_t rodeos);
+   __attribute__((import_name("rodeos_get_pushed_data"))) uint32_t
+   rodeos_get_pushed_data(uint32_t rodeos, uint32_t index, char* dest, uint32_t dest_size);
+   __attribute__((import_name("rodeos_push_transaction"))) void
+   rodeos_push_transaction(uint32_t rodeos, const char* packed_args, uint32_t packed_args_size, void* cb_alloc_data,
+                           cb_alloc_type cb_alloc);
+   __attribute__((import_name("rodeos_sync_block"))) bool   rodeos_sync_block(uint32_t rodeos);
+   __attribute__((import_name("select_chain_for_db"))) void select_chain_for_db(uint32_t chain_index);
+   __attribute__((import_name("shutdown_chain"))) void      shutdown_chain(uint32_t chain);
+   __attribute__((import_name("start_block"))) void         start_block(uint32_t chain_index, int64_t skip_miliseconds);
+   __attribute__((import_name("write_snapshot"))) void write_snapshot(uint32_t chain, const char* snapshot_filename,
+                                                                      uint32_t snapshot_filename_size);
+   __attribute__((import_name("sign"))) uint32_t sign(const void* key, uint32_t keylen, const void* digest, void* sig,
+                                                      uint32_t siglen);
+   __attribute__((import_name("set_push_event_alloc"))) void set_push_event_alloc(uint32_t chain_index,
+                                                                                  void* cb_alloc_data,
+                                                                                  cb_alloc_type cb_alloc);
+   }
 
    inline const std::vector<char>& get_args() {
       static std::optional<std::vector<char>> bytes;
@@ -48,6 +70,14 @@ namespace {
    template <typename Alloc_fn>
    inline bool read_whole_file(const char* filename_begin, uint32_t filename_size, Alloc_fn alloc_fn) {
       return read_whole_file(filename_begin, filename_size, &alloc_fn,
+                             [](void* cb_alloc_data, size_t size) -> void* { //
+                                return (*reinterpret_cast<Alloc_fn*>(cb_alloc_data))(size);
+                             });
+   }
+
+   template <typename Alloc_fn>
+   inline bool read_abi_file(const char* filename_begin, uint32_t filename_size, Alloc_fn alloc_fn) {
+      return read_abi_file(filename_begin, filename_size, &alloc_fn,
                              [](void* cb_alloc_data, size_t size) -> void* { //
                                 return (*reinterpret_cast<Alloc_fn*>(cb_alloc_data))(size);
                              });
@@ -80,7 +110,6 @@ namespace {
          return (*reinterpret_cast<Alloc_fn*>(cb_alloc_data))(size);
       });
    }
-
 } // namespace
 
 const std::vector<std::string>& eosio::get_args() {
@@ -102,6 +131,17 @@ std::vector<char> eosio::read_whole_file(std::string_view filename) {
       check(false, "read " + std::string(filename) + " failed");
    return result;
 }
+
+std::vector<char> eosio::read_abi_file(std::string_view filename) {
+   std::vector<char> result;
+   if (!::read_abi_file(filename.data(), filename.size(), [&](size_t size) {
+          result.resize(size);
+          return result.data();
+       }))
+      check(false, "read " + std::string(filename) + " failed");
+   return result;
+}
+
 
 int32_t eosio::execute(std::string_view command) { return ::execute(command.data(), command.size()); }
 
@@ -271,6 +311,10 @@ void eosio::test_chain::start_block(int64_t skip_miliseconds) {
    }
 }
 
+void eosio::test_chain::write_snapshot(const char* snapshot_filename) {
+   ::write_snapshot(id, snapshot_filename ? snapshot_filename : "", snapshot_filename ? strlen(snapshot_filename) : 0);
+}
+
 void eosio::test_chain::finish_block() {
    head_block_info.reset();
    ::finish_block(id);
@@ -348,8 +392,8 @@ std::optional<eosio::transaction_trace> eosio::test_chain::exec_deferred() {
 void build_history_result(eosio::test_chain::get_history_result& history_result, eosio::ship_protocol::get_blocks_result_v0& blocks_result) {
    history_result.result = blocks_result;
    if (blocks_result.block) {
-      history_result.block.emplace();
-      (void)from_bin(*history_result.block, *blocks_result.block);
+      history_result.block_header.emplace();
+      (void)from_bin(*history_result.block_header, *blocks_result.block);
    }
    if (blocks_result.traces) {
       (void)from_bin(history_result.traces, *blocks_result.traces);
@@ -362,14 +406,23 @@ void build_history_result(eosio::test_chain::get_history_result& history_result,
 void build_history_result(eosio::test_chain::get_history_result& history_result, eosio::ship_protocol::get_blocks_result_v1& blocks_result) {
    history_result.result = blocks_result;
    if (blocks_result.block) {
-      history_result.block = std::move(*blocks_result.block);
+      history_result.block_header = std::visit([](const auto& v){
+         return static_cast<const eosio::ship_protocol::block_header&>(v);
+      }, *blocks_result.block);
    }
-   if (!blocks_result.traces.empty()) {
-      blocks_result.traces.unpack(history_result.traces);
+   eosio::unpack(blocks_result.traces, history_result.traces);
+   eosio::unpack(blocks_result.deltas, history_result.deltas);
+}
+
+void build_history_result(eosio::test_chain::get_history_result& history_result, eosio::ship_protocol::get_blocks_result_v2& blocks_result) {
+   history_result.result = blocks_result;
+   
+   if (!blocks_result.block_header.empty()) {
+      auto& v = history_result.block_header.emplace();
+      eosio::unpack(blocks_result.block_header, v); 
    }
-   if (blocks_result.deltas.empty()) {
-      blocks_result.deltas.unpack(history_result.deltas);
-   }
+   eosio::unpack(blocks_result.traces, history_result.traces);
+   eosio::unpack(blocks_result.deltas, history_result.deltas);
 }
 
 template <typename T>
@@ -579,8 +632,24 @@ std::ostream& eosio::ship_protocol::operator<<(std::ostream& os, const eosio::sh
 }
 
 extern "C" {
-   void send_inline(char *serialized_action, size_t size) {
+   void send_inline(char *serialized_action, uint32_t size) {
       eosio::check(current_chain != nullptr, "Cannot send an action without a blockchain");
       current_chain->transact({ eosio::unpack<eosio::action>(serialized_action, size) });
    }
+}
+
+
+void eosio::test_chain::setup_event_queue() {
+   ::set_push_event_alloc(id, &event_queue, [](void* cb_alloc_data, size_t size) -> void* { //
+      return reinterpret_cast<std::vector<std::vector<char>>*>(cb_alloc_data)->emplace_back(size).data();
+   });
+}
+
+std::vector<eosio::event_wrapper> eosio::test_chain::pull_events() {
+   std::vector<eosio::event_wrapper> events(event_queue.size());
+   std::transform(event_queue.begin(), event_queue.end(), events.begin(), [](const auto& v) {
+      return eosio::unpack<eosio::event_wrapper>(v);
+   });
+   event_queue.resize(0);
+   return events;
 }

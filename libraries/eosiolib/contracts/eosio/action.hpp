@@ -18,42 +18,42 @@
 #include <boost/preprocessor/variadic/size.hpp>
 #include <boost/preprocessor/variadic/to_seq.hpp>
 #include <boost/preprocessor/variadic/to_tuple.hpp>
-
+#include <memory>
 namespace eosio {
 
    namespace internal_use_do_not_use {
       extern "C" {
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("read_action_data"))) 
          uint32_t read_action_data( void* msg, uint32_t len );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("action_data_size"))) 
          uint32_t action_data_size();
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("require_recipient"))) 
          void require_recipient( uint64_t name );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("require_auth"))) 
          void require_auth( uint64_t name );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("has_auth"))) 
          bool has_auth( uint64_t name );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("require_auth2"))) 
          void require_auth2( uint64_t name, uint64_t permission );
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("is_account"))) 
          bool is_account( uint64_t name );
 
-         __attribute__((eosio_wasm_import))
-         void send_inline(char *serialized_action, size_t size);
+         __attribute__((import_name("send_inline"))) 
+         void send_inline(char *serialized_action, uint32_t size);
 
-         __attribute__((eosio_wasm_import))
-         void send_context_free_inline(char *serialized_action, size_t size);
+         __attribute__((import_name("send_context_free_inline"))) 
+         void send_context_free_inline(char *serialized_action, uint32_t size);
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("publication_time"))) 
          uint64_t  publication_time();
 
-         __attribute__((eosio_wasm_import))
+         __attribute__((import_name("current_receiver"))) 
          uint64_t current_receiver();
       }
    };
@@ -86,9 +86,10 @@ namespace eosio {
    T unpack_action_data() {
       constexpr size_t max_stack_buffer_size = 512;
       size_t size = internal_use_do_not_use::action_data_size();
-      char* buffer = (char*)( max_stack_buffer_size < size ? malloc(size) : alloca(size) );
-      internal_use_do_not_use::read_action_data( buffer, size );
-      return unpack<T>( buffer, size );
+      auto free_memory = [size](char* buf) { if (max_stack_buffer_size < size) free(buf);};
+      std::unique_ptr<char, decltype(free_memory)> buffer( (char*)(max_stack_buffer_size < size ? malloc(size) : alloca(size)), free_memory);
+      internal_use_do_not_use::read_action_data(buffer.get(), size );
+      return unpack<T>( (const char*)buffer.get(), size );
    }
 
    /**

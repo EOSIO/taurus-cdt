@@ -1,9 +1,5 @@
 #pragma once
 #include <eosio/action.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/include/std_tuple.hpp>
-
-#include <boost/mp11/tuple.hpp>
 
 #ifdef __cplusplus 
 extern "C" {
@@ -15,8 +11,8 @@ extern "C" {
  * @param size - size of serialized return value in bytes
  * @pre `return_value` is a valid pointer to an array at least `size` bytes long
  */
-__attribute__((eosio_wasm_import))
-void set_action_return_value(void *return_value, size_t size);
+__attribute__((import_name("set_action_return_value")))
+void set_action_return_value(void *return_value, uint32_t size);
 
 #ifdef __cplusplus 
 } // extern "C"
@@ -207,7 +203,7 @@ extern "C" { \
 
 #define EOSIO_ACTION_DISPATCHER( NAMESPACE ) \
 extern "C" { \
-   [[eosio::wasm_entry]] \
+   __attribute__((weak, export_name("apply"), visibility("default"))) \
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) { \
       NAMESPACE :: eosio_apply( receiver, code, action ); \
    }\

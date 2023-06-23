@@ -49,17 +49,17 @@ class [[eosio::contract]] simple_tests : public contract {
          check(nm == "bucky"_n, "should be bucky");
       }
 
-      [[eosio::action]] 
-      void testd(name nm) {
-         transaction t;
-         action act;
-         act.account = "other"_n;
-         act.name    = "testc"_n;
-         act.authorization = {permission_level{get_self(), "active"_n}};
-         std::vector<char> data = pack(nm);
-         t.actions.push_back(act);
-         t.send(nm.value, get_self());
-      }
+      // [[eosio::action]] 
+      // void testd(name nm) {
+      //    transaction t;
+      //    action act;
+      //    act.account = "other"_n;
+      //    act.name    = "testc"_n;
+      //    act.authorization = {permission_level{get_self(), "active"_n}};
+      //    std::vector<char> data = pack(nm);
+      //    t.actions.push_back(act);
+      //    t.send(nm.value, get_self());
+      // }
 
       [[eosio::on_notify("eosio.token::transfer")]] 
       void on_transfer(name from, name to, asset quant, std::string memo) {

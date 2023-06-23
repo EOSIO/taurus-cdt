@@ -6,7 +6,7 @@
 #include <limits>
 #include <string>
 
-#include <eosio/tester.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/symbol.hpp>
 
 using std::numeric_limits;

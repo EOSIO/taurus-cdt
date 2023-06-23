@@ -1,83 +1,158 @@
 find_program(SCCACHE_FOUND sccache)
-if (SCCACHE_FOUND)
-   message(STATUS "Using sccache")
-   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE sccache)
+if(SCCACHE_FOUND)
+  message(STATUS "Using sccache")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE sccache)
 else()
-   find_program(CCACHE_FOUND ccache)
-   if (CCACHE_FOUND)
-      message(STATUS "Using ccache")
-      set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-   endif()
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    message(STATUS "Using ccache")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-missing-ricardian-clause")
+# cmake-format: off
+macro(add_unit_test TEST_NAME)
+   add_test( ${TEST_NAME} ${CMAKE_BINARY_DIR}/tests/unit/native/${TEST_NAME} )
+   set_property(TEST ${TEST_NAME} PROPERTY LABELS unit_tests)
+endmacro()
 
-add_test( asset_tests ${CMAKE_BINARY_DIR}/tests/unit/asset_tests )
-set_property(TEST asset_tests PROPERTY LABELS unit_tests)
-add_test( binary_extension_tests ${CMAKE_BINARY_DIR}/tests/unit/binary_extension_tests )
-set_property(TEST binary_extension_tests PROPERTY LABELS unit_tests)
-add_test( crypto_tests ${CMAKE_BINARY_DIR}/tests/unit/crypto_tests )
-set_property(TEST crypto_tests PROPERTY LABELS unit_tests)
-add_test( datastream_tests ${CMAKE_BINARY_DIR}/tests/unit/datastream_tests )
-set_property(TEST datastream_tests PROPERTY LABELS unit_tests)
-add_test( fixed_bytes_tests ${CMAKE_BINARY_DIR}/tests/unit/fixed_bytes_tests )
-set_property(TEST fixed_bytes_tests PROPERTY LABELS unit_tests)
-add_test( name_tests ${CMAKE_BINARY_DIR}/tests/unit/name_tests )
-set_property(TEST name_tests PROPERTY LABELS unit_tests)
-add_test( rope_tests ${CMAKE_BINARY_DIR}/tests/unit/rope_tests )
-set_property(TEST rope_tests PROPERTY LABELS unit_tests)
-add_test( print_tests ${CMAKE_BINARY_DIR}/tests/unit/print_tests )
-set_property(TEST print_tests PROPERTY LABELS unit_tests)
-add_test( serialize_tests ${CMAKE_BINARY_DIR}/tests/unit/serialize_tests )
-set_property(TEST serialize_tests PROPERTY LABELS unit_tests)
-add_test( string_tests ${CMAKE_BINARY_DIR}/tests/unit/string_tests )
-set_property(TEST string_tests PROPERTY LABELS unit_tests)
-add_test( symbol_tests ${CMAKE_BINARY_DIR}/tests/unit/symbol_tests )
-set_property(TEST symbol_tests PROPERTY LABELS unit_tests)
-add_test( system_tests ${CMAKE_BINARY_DIR}/tests/unit/system_tests )
-set_property(TEST system_tests PROPERTY LABELS unit_tests)
-add_test( time_tests ${CMAKE_BINARY_DIR}/tests/unit/time_tests )
-set_property(TEST time_tests PROPERTY LABELS unit_tests)
-add_test( varint_tests ${CMAKE_BINARY_DIR}/tests/unit/varint_tests )
-set_property(TEST varint_tests PROPERTY LABELS unit_tests)
+add_unit_test( asset_tests )
+add_unit_test( binary_extension_tests )
+add_unit_test( crypto_tests )
+add_unit_test( datastream_tests )
+add_unit_test( fixed_bytes_tests )
+add_unit_test( name_tests )
+add_unit_test( rope_tests )
+add_unit_test( print_tests )
+add_unit_test( serialize_tests )
+add_unit_test( symbol_tests )
+add_unit_test( system_tests )
+add_unit_test( time_tests )
+add_unit_test( varint_tests )
+add_unit_test( pb_serialize_tests )
+add_unit_test( memory_alloc_tests )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/unit/version_tests.sh ${CMAKE_BINARY_DIR}/tests/unit/version_tests.sh COPYONLY)
-add_test(NAME version_tests COMMAND ${CMAKE_BINARY_DIR}/tests/unit/version_tests.sh "${VERSION_FULL}" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-set_property(TEST version_tests PROPERTY LABELS unit_tests)
+# cmake-format: on
 
-add_test( NAME toolchain_tests COMMAND ${CMAKE_BINARY_DIR}/tools/toolchain-tester/toolchain-tester ${CMAKE_SOURCE_DIR}/tests/toolchain --cdt ${CMAKE_BINARY_DIR}/bin )
+add_subdirectory(toolchain-tester)
+add_test(
+  NAME toolchain_tests
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/toolchain-tester/toolchain-tester
+          ${CMAKE_CURRENT_SOURCE_DIR}/toolchain --cdt ${CMAKE_BINARY_DIR}/bin
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/toolchain-tester)
 set_property(TEST toolchain_tests PROPERTY LABELS toolchain_tests)
 
-add_test(NAME rt_tests COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/libraries/rt/test/rt_tests.cmake WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/libraries/rt/test/)
-set_property(TEST rt_tests PROPERTY LABELS unit_tests)
-
-if (EOSIO_RUN_INTEGRATION_TESTS)
-   find_package(eosio)
-
-   if (NOT eosio_FOUND)
-      message(WARNING "Could not find eosio")
-   endif()
-
-   add_test(integration_tests ${EOSIO_ROOT}/bin/eosio-tester ${CMAKE_BINARY_DIR}/tests/integration/integration_tests.wasm)
-   set_property(TEST integration_tests PROPERTY LABELS integration_tests)
-
-   add_test(
-      NAME tester_tests
-      COMMAND ${EOSIO_ROOT}/bin/eosio-tester ${CMAKE_BINARY_DIR}/tests/tester/tester.wasm
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/tester
-   )
-   set_property(TEST tester_tests PROPERTY LABELS tester_tests)
-endif()
+# cmake-format: off
 
 ExternalProject_Add(
-   TesterTests
-   SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/tester"
-   BINARY_DIR "${CMAKE_BINARY_DIR}/tests/tester"
-   CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/eosio.cdt/EosioWasmToolchain.cmake -DEOSIO_CDT_BIN=${CMAKE_BINARY_DIR}/lib/cmake/eosio.cdt/ -DBASE_BINARY_DIR=${CMAKE_BINARY_DIR} -D__APPLE=${APPLE}
-   UPDATE_COMMAND ""
-   PATCH_COMMAND  ""
-   TEST_COMMAND   ""
-   INSTALL_COMMAND ""
-   BUILD_ALWAYS 1
-   DEPENDS EosioTools EosioWasmLibraries
-)
+  TesterWasmTests
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/tester"
+  BINARY_DIR "${CMAKE_BINARY_DIR}/tests/tester/wasm"
+  CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/${CMAKE_PROJECT_NAME}/EosioWasmToolchain.cmake
+    -DCMAKE_BUILD_TYPE=Release
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  TEST_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_ALWAYS 1
+  DEPENDS EosioWasmLibraries-Release EosioPlugins)
+
+  ExternalProject_Add(
+    TesterNativeTests
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/tester"
+    BINARY_DIR "${CMAKE_BINARY_DIR}/tests/tester/native"
+    CMAKE_ARGS
+      -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/${CMAKE_PROJECT_NAME}/EosioNativeToolchain.cmake
+      -DCMAKE_BUILD_TYPE=Debug
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+    BUILD_ALWAYS 1
+    DEPENDS EosioWasmLibraries-Release EosioNativeLibraries-Debug EosioPlugins)
+
+
+ExternalProject_Add(
+  EosioWasmTests
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/unit/test_contracts"
+  BINARY_DIR "${CMAKE_BINARY_DIR}/tests/unit/test_contracts/wasm"
+  CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/${CMAKE_PROJECT_NAME}/EosioWasmToolchain.cmake
+    -DCMAKE_BUILD_TYPE=Release
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  TEST_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_ALWAYS 1
+  DEPENDS EosioWasmLibraries-Release EosioPlugins)
+
+ExternalProject_Add(
+  EosioNativeTests
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/unit/test_contracts"
+  BINARY_DIR "${CMAKE_BINARY_DIR}/tests/unit/test_contracts/native"
+  CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/${CMAKE_PROJECT_NAME}/EosioNativeToolchain.cmake
+    -DCMAKE_BUILD_TYPE=Debug
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  TEST_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_ALWAYS 1
+  DEPENDS EosioWasmLibraries-Release EosioNativeLibraries-Debug  EosioPlugins)
+
+ExternalProject_Add(
+  EosioLibNativeTests
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/unit"
+  BINARY_DIR "${CMAKE_BINARY_DIR}/tests/unit/native"
+  CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/${CMAKE_PROJECT_NAME}/EosioNativeToolchain.cmake
+    -DCMAKE_BUILD_TYPE=Debug
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  TEST_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_ALWAYS 1
+  DEPENDS EosioWasmLibraries-Release EosioNativeLibraries-Debug)
+
+
+function(add_integeration_test Mode build_type tester suffix)
+  set(TESTER_PATH ${TAURUS_NODE_ROOT}/bin/${tester})
+  string(TOLOWER ${Mode} mode)
+
+  if (ENV{BUILDKITE} OR EXISTS "${TESTER_PATH}")
+    add_test(${mode}_integration_tests ${TESTER_PATH}
+            ${CMAKE_BINARY_DIR}/tests/integration/integration_tests${suffix})
+    set_property(TEST ${mode}_integration_tests PROPERTY LABELS integration_tests)
+
+    add_test(
+      NAME ${mode}_tester_tests
+      COMMAND ${TESTER_PATH}
+              ${CMAKE_BINARY_DIR}/tests/tester/tester${suffix}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/tester)
+    set_property(TEST ${mode}_tester_tests PROPERTY LABELS integration_tests)
+
+    ExternalProject_Add(
+      Eosio${Mode}IntegrationTests
+      SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/integration"
+      BINARY_DIR "${CMAKE_BINARY_DIR}/tests/integration/${Mode}"
+      CMAKE_ARGS
+        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/${CMAKE_PROJECT_NAME}/Eosio${Mode}Toolchain.cmake
+        -DCMAKE_BUILD_TYPE=${build_type}
+      UPDATE_COMMAND ""
+      PATCH_COMMAND ""
+      TEST_COMMAND ""
+      INSTALL_COMMAND ""
+      BUILD_ALWAYS 1
+      DEPENDS Eosio${Mode}Tests)
+  else()
+    message(WARNING "Could not find ${TESTER_PATH}, skipping ${mode} integration tests.")
+  endif()
+endfunction()
+
+if (TAURUS_NODE_ROOT)
+  add_integeration_test(Wasm Release eosio-tester .wasm)
+  add_integeration_test(Native Debug native-tester .so)
+endif()
+
+add_subdirectory(gen-zpp-tests)

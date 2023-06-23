@@ -7,6 +7,7 @@
 #include <eosio/varint.hpp>
 #include <eosio/to_bin.hpp>
 #include <eosio/from_bin.hpp>
+#include <eosio/serialize.hpp>
 
 #include <list>
 #include <queue>
@@ -19,13 +20,10 @@
 #include <variant>
 #include <experimental/type_traits>
 
-#include <boost/fusion/algorithm/iteration/for_each.hpp>
-#include <boost/fusion/include/for_each.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/include/std_tuple.hpp>
-
 #include <boost/mp11/tuple.hpp>
 #include <boost/pfr.hpp>
+#include <zpp_bits.h>
+#include <magic_enum.hpp>
 
 namespace eosio {
 
@@ -365,7 +363,12 @@ void to_bin( const T& v, datastream<DataStream>& ds ) {
  */
 template<typename DataStream, typename T, std::enable_if_t<_datastream_detail::is_datastream<DataStream>::value>* = nullptr>
 DataStream& operator>>( DataStream& ds, T& v ) {
-   from_bin(v, ds);
+   if constexpr ( requires { from_pb(v); }) {
+      zpp::bits::in in(std::span(ds.pos(), ds.remaining()), zpp::bits::size_varint{}, zpp::bits::protobuf{});
+      check(std::errc{} == in(from_pb(v)), "protobuf deserialization failure");
+   } else {
+      from_bin(v, ds);
+   }
    return ds;
 }
 
@@ -390,6 +393,22 @@ T unpack( const char* buffer, size_t len ) {
    datastream<const char*> ds(buffer,len);
    ds >> result;
    return result;
+}
+
+/**
+ * Unpack data inside a fixed size buffer as T
+ *
+ * @ingroup datastream
+ * @tparam T - Type of the unpacked data
+ * @param res - Variable to fill with the unpacking
+ * @param buffer - Pointer to the buffer
+ * @param len - Length of the buffer
+ * @return T - The unpacked data
+ */
+template<typename T>
+void unpack( T& res, const char* buffer, size_t len ) {
+   datastream<const char*> ds(buffer,len);
+   ds >> res;
 }
 
 /**
@@ -432,12 +451,98 @@ size_t pack_size( const T& value ) {
  * @return bytes - The packed data
  */
 template<typename T>
-std::vector<char> pack( const T& value ) {
-  std::vector<char> result;
-  result.resize(pack_size(value));
+std::vector<char> pack( const T& v )  {
+   std::vector<char> result;
+   if constexpr ( requires { from_pb(v); }) {
+      zpp::bits::out  out(result, zpp::bits::size_varint{}, zpp::bits::protobuf{});
+      check(std::errc{} == out(from_pb(v)), "protobuf serialization failure");
+   } else {
+      result.resize(pack_size(v));
+      datastream<char*> ds( result.data(), result.size() );
+      ds << v;      
+   }
+   return result;
+}
 
-  datastream<char*> ds( result.data(), result.size() );
-  ds << value;
-  return result;
+template <typename T, zpp::bits::varint_encoding Encoding, typename S>
+void from_json(zpp::bits::varint<T, Encoding>& obj, S& stream) {
+   from_json(obj.value, stream);
 }
+
+template <typename T, zpp::bits::varint_encoding Encoding, typename S>
+void to_json(zpp::bits::varint<T, Encoding> obj, S& stream) {
+   to_json(obj.value, stream);
 }
+
+template <typename S>
+void from_bin(zpp::bits::vuint32_t& obj, S& stream) {
+   varuint32_from_bin(obj.value, stream);
+}
+
+template <typename S>
+void to_bin(zpp::bits::vuint32_t obj, S& stream) {
+   varuint32_to_bin(obj.value, stream);
+}
+
+template <typename S>
+void from_bin(zpp::bits::vuint64_t& obj, S& stream) {
+   varuint64_from_bin(obj.value, stream);
+}
+
+template <typename S>
+void to_bin(zpp::bits::vuint64_t obj, S& stream) {
+   varuint64_to_bin(obj.value, stream);
+}
+
+template <typename S>
+void from_bin(zpp::bits::vint32_t& obj, S& stream) {
+   uint32_t v;
+   varuint32_from_bin(v, stream);
+   obj.value = v;
+}
+
+template <typename S>
+void to_bin(zpp::bits::vint32_t obj, S& stream) {
+   varuint32_to_bin((uint32_t)obj.value, stream);
+}
+
+template <typename S>
+void from_bin(zpp::bits::vint64_t& obj, S& stream) {
+   uint64_t v;
+   varuint64_from_bin(v, stream);
+   obj.value = v;
+}
+
+template <typename S>
+void to_bin(zpp::bits::vint64_t obj, S& stream) {
+   varuint64_to_bin((uint64_t)obj.value, stream);
+}
+
+template <typename S>
+void from_bin(zpp::bits::vsint32_t& obj, S& stream) {
+   varint32_from_bin(obj.value, stream);
+}
+
+template <typename S>
+void to_bin(zpp::bits::vsint32_t obj, S& stream) {
+   varint32_to_bin(obj.value, stream);
+}
+
+template <typename E, typename S>
+requires std::is_enum_v<E>
+void from_json(E& obj, S& stream) {
+   auto name = stream.get_string();
+   auto v = magic_enum::enum_cast<E>(name);
+   eosio::check(v.has_value(), std::string("invalid enumeration value ") + std::string{name});
+   obj = v.value();
+}
+
+template <typename E, typename S>
+requires std::is_enum_v<E>
+void to_json(E obj, S& stream) {
+   std::string_view name = magic_enum::enum_name(obj);
+   to_json(name, stream);
+}
+
+}
+

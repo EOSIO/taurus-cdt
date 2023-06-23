@@ -3,16 +3,15 @@
  *  @copyright defined in eos/LICENSE
  */
 #pragma once
-
-#include_next <eosio/name.hpp>
+#include "reflect.hpp"
+#include <eosio/abieos_name.hpp>
 
 /// @cond IMPLEMENTATIONS
 
 namespace eosio {
    namespace internal_use_do_not_use {
       extern "C" {
-         __attribute__((eosio_wasm_import))
-         void printn(uint64_t);
+         __attribute__((import_name("printn"))) void printn(uint64_t);
       }
    }
 

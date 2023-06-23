@@ -1,0 +1,16 @@
+{
+  "tests" : [
+    {
+      "compile_flags": ["--contract", "nothello"],
+      "expected" : {
+        "stderr": "abigen error"
+      }
+    },
+    {
+      "compile_flags": [],
+      "expected" : {
+        "stderr": "abigen error"
+      }
+    }
+  ]
+}

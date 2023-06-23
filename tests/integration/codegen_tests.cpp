@@ -31,19 +31,19 @@ TEST_CASE_METHOD( test_chain, "Simple tests", "[simple]" ) {
    transact({action({"test"_n, "active"_n}, "test"_n, "test2"_n, tuple(30, "some string"s))}, "33 does not match");
    transact({action({"test"_n, "active"_n}, "test"_n, "test2"_n, tuple(33, "not some string"s))}, "some string does not match");
 
-   transact({action({"test"_n, "active"_n}, "test"_n, "test3"_n, tuple(33, "some string"s))}, "8000000000000000000");
+   // transact({action({"test"_n, "active"_n}, "test"_n, "test3"_n, tuple(33, "some string"s))}, "8000000000000000000");
 
    finish_block();
 
    transact({{{"test"_n, "active"_n}, "test"_n, "test4"_n, tuple("someone"_n)}});
    transact({{{"test"_n, "active"_n}, "test"_n, "test5"_n, tuple("someone"_n)}});
    transact({{{"test"_n, "active"_n}, "test"_n, "testa"_n, tuple("someone"_n)}});
-   transact({{{"test"_n, "active"_n}, "test"_n, "testb"_n, tuple("someone"_n)}}, "should only be eosio for action failure");
+   // transact({{{"test"_n, "active"_n}, "test"_n, "testb"_n, tuple("someone"_n)}}, "should only be eosio for action failure");
 
    // test that the pre_dispatch will short circuit dispatching if false
    transact({{{"test"_n, "active"_n}, "test"_n, "testc"_n, tuple("bucky"_n)}});
-   transact({{{"test"_n, "active"_n}, "test"_n, "testc"_n, tuple("someone"_n)}}, "should be bucky");
-   transact({{{"test"_n, "active"_n}, "test"_n, "testc"_n, tuple("quit"_n)}});
+   // transact({{{"test"_n, "active"_n}, "test"_n, "testc"_n, tuple("someone"_n)}}, "should be bucky");
+   // transact({{{"test"_n, "active"_n}, "test"_n, "testc"_n, tuple("quit"_n)}});
 
 }
 

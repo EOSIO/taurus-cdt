@@ -1,80 +1,90 @@
-cmake_minimum_required(VERSION 3.5)
-find_package(LLVM REQUIRED CONFIG)
-message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+set(CMAKE_CXX_STANDARD 20)
 
-find_program(SCCACHE_FOUND sccache)
-if (SCCACHE_FOUND)
-   message(STATUS "Using sccache")
-   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE sccache)
-else()
-   find_program(CCACHE_FOUND ccache)
-   if (CCACHE_FOUND)
-      message(STATUS "Using ccache")
-      set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-   endif()
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+function(copy_to_bin target)
+  add_custom_command(OUTPUT
+          ${CMAKE_BINARY_DIR}/bin/${target}
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}>
+          ${CMAKE_BINARY_DIR}/bin
+      DEPENDS ${target}
+  )
+  # Create target which consume the command via DEPENDS.
+  add_custom_target(copy_${target} ALL
+      DEPENDS ${CMAKE_BINARY_DIR}/bin/${target}
+  )
+  install(TARGETS ${target})
+endfunction()
+
+
+add_executable(eosio-codegen src/eosio-codegen.cpp ${abieos_SOURCE_DIR}/src/pb_support.cpp)
+target_compile_definitions(eosio-codegen PRIVATE
+  SHARED_LIB_SUFFIX=\"${CMAKE_SHARED_LIBRARY_SUFFIX}\"
+  ABIEOS_HAS_PROTOBUF
+)
+target_include_directories(eosio-codegen
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${jsoncons_SOURCE_DIR}/include
+    ${cxxopts_SOURCE_DIR}/include
+    ${LLVM_INCLUDE_DIRS}
+)
+target_link_libraries(eosio-codegen PRIVATE LLVMSupport abieos)
+
+set_target_properties(eosio-codegen PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+install(TARGETS eosio-codegen)
+
+target_compile_definitions(eosio-codegen PRIVATE EOSIO_CDT_VERSION="${VERSION_FULL}")
+
+add_executable(eosio-pp src/postpass.cc)
+target_link_libraries(eosio-pp wabt)
+target_include_directories(eosio-pp PRIVATE ${wabt_SOURCE_DIR} ${wabt_BINARY_DIR})
+set_target_properties(eosio-pp PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+install(TARGETS eosio-pp)
+
+
+function(target_add_protobuf TARGET)
+  foreach(protofile ${ARGN})
+    cmake_path(REPLACE_EXTENSION protofile LAST_ONLY "pb.h" OUTPUT_VARIABLE hdr)
+    cmake_path(REPLACE_EXTENSION protofile LAST_ONLY "pb.cc" OUTPUT_VARIABLE src)
+    list(APPEND hdrs ${hdr})
+    list(APPEND srcs ${src})
+  endforeach()
+
+  add_custom_command(
+    COMMENT Generating ${hdrs} ${srcs}
+    OUTPUT ${hdrs} ${srcs}
+    COMMAND protobuf::protoc -I ${Protobuf_INCLUDE_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR} --cpp_out ${CMAKE_CURRENT_BINARY_DIR} ${ARGN}
+    DEPENDS protobuf::protoc
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+  target_sources(${TARGET} PRIVATE ${srcs} ${hdrs}) 
+endfunction()
+
+add_executable(protoc-gen-zpp src/zpp-protoc-plugin.cpp)
+target_add_protobuf(protoc-gen-zpp src/zpp_options.proto)
+target_link_libraries(protoc-gen-zpp PRIVATE protobuf::libprotoc protobuf::libprotobuf)
+target_include_directories(protoc-gen-zpp PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+install(TARGETS protoc-gen-zpp)
+set_target_properties(protoc-gen-zpp PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+copy_to_bin(wat2wasm)
+copy_to_bin(wasm2wat)
+copy_to_bin(wasm-objdump)
+
+foreach(target clang clang++ wasm-ld llvm-ar llvm-ranlib )
+  file(CREATE_LINK  ${LLVM_TOOLS_BINARY_DIR}/${target} ${CMAKE_BINARY_DIR}/bin/${target} SYMBOLIC)
+  install(FILES ${CMAKE_BINARY_DIR}/bin/${target} TYPE BIN)
+endforeach()
+
+if(NOT TARGET EosioTools)
+  add_custom_target(EosioTools)
+  add_dependencies(EosioTools eosio-codegen eosio-pp)
 endif()
 
-include_directories(${LLVM_INCLUDE_DIRS})
-include_directories(${LLVM_SRCDIR}/tools/clang/include)
-include_directories(${LLVM_BINDIR}/tools/clang/include)
-include_directories(${LLVM_SRCDIR}/include)
-include_directories(${LLVM_BINDIR}/include)
-link_directories(${LLVM_LIBRARY_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
+configure_file(src/zpp_options.proto ${CMAKE_CURRENT_BINARY_DIR}/../include/zpp/zpp_options.proto COPYONLY)
 
-set(EOSIO_STACK_SIZE 8192)
-
-macro (add_tool name)
-   set(LLVM_LINK_COMPONENTS support)
-
-   include_directories(include)
-
-   add_executable(${name} ${CMAKE_BINARY_DIR}/${name}.cpp)
-   set_property(TARGET ${name} PROPERTY CXX_STANDARD 17)
-   target_compile_options(${name} PRIVATE -fexceptions -fno-rtti)
-   target_include_directories(${name} PUBLIC ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include ${CMAKE_CURRENT_SOURCE_DIR}/../jsoncons/include ${CMAKE_SOURCE_DIR}/eosio_llvm/tools/clang/include ${LLVM_INCLUDE_DIR})
-   target_link_libraries(${name}
-     clangTooling
-     clangBasic
-     clangASTMatchers
-     clangRewrite
-     clangToolingCore
-     clangFrontend
-     clangDriver
-     clangSerialization
-     clangParse
-     clangSema
-     clangAnalysis
-     clangAST
-     clangLex
-     clangBasic
-     clangEdit
-
-     LLVMipo
-     LLVMScalarOpts
-     LLVMInstCombine
-     LLVMTransformUtils
-     LLVMAnalysis
-     LLVMTarget
-     LLVMOption
-     LLVMMCParser
-     LLVMMC
-     LLVMObject
-     LLVMBitReader
-     LLVMCore
-     LLVMSupport
-     LLVMDemangle
-   )
-
-   add_custom_command( TARGET ${name} POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/bin )
-   add_custom_command( TARGET ${name} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${name}> ${CMAKE_BINARY_DIR}/bin/ )
-endmacro()
-
-add_subdirectory(abidiff)
-add_subdirectory(cc)
-add_subdirectory(ld)
-add_subdirectory(init)
-add_subdirectory(external)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/compiler_options.hpp.in ${CMAKE_BINARY_DIR}/compiler_options.hpp)

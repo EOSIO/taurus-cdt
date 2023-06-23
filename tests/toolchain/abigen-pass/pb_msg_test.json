@@ -1,0 +1,11 @@
+{
+   "tests" : [
+      {
+         "proto_dir": "../../unit/test_contracts",
+         "proto_files": ["test.proto"],
+         "expected" : {
+            "abi-file" : "pb_msg_test.abi"
+         }
+      }
+   ]
+}

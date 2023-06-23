@@ -24,13 +24,21 @@ class [[eosio::contract]] malloc_tests : public contract{
          volatile __int128_t *ptr5 = (__int128_t*)malloc(sizeof(__int128_t));
          *ptr5 = ((__int128_t(0x6666666666666666) << 64) | 0x6666666666666666);
          volatile __int128_t *ptr6 = (__int128_t*)malloc(sizeof(__int128_t) * 2);
-         ptr6[0] = ptr6[1] = ((__int128_t(0x7777777777777777) << 64) | 0x7777777777777777);
+         __int128_t var6 = ((__int128_t(0x7777777777777777) << 64) | 0x7777777777777777);
+         ptr6[0] = var6;
+         ptr6[1] = var6;
          volatile __int128_t *ptr7 = (__int128_t*)malloc(sizeof(__int128_t) * 2);
-         ptr7[0] = ptr7[1] = ((__int128_t(0x8888888888888888) << 64) | 0x8888888888888888);
+         __int128_t var7 = ((__int128_t(0x8888888888888888) << 64) | 0x8888888888888888);;
+         ptr7[0] = var7;
+         ptr7[1] = var7;
          volatile long long *ptr8 = (long long*)malloc(sizeof(long long) * 3);
-         ptr8[0] = ptr8[1] = ptr8[2] = 0x9999999999999999;
+         ptr8[0] = 0x9999999999999999;
+         ptr8[1] = 0x9999999999999999;
+         ptr8[2] = 0x9999999999999999;
          volatile long long *ptr9 = (long long*)malloc(sizeof(long long) * 3);
-         ptr9[0] = ptr9[1] = ptr9[2] = 0xAAAAAAAAAAAAAAAA;
+         ptr9[0] = 0xAAAAAAAAAAAAAAAA;
+         ptr9[1] = 0xAAAAAAAAAAAAAAAA;
+         ptr9[2] = 0xAAAAAAAAAAAAAAAA;
          eosio::check(*ptr0 == 0x11, "wrong value for char");
          eosio::check(*ptr1 == 0x2222, "wrong value for short");
          eosio::check(*ptr2 == 0x33333333, "wrong value for int");
@@ -52,7 +60,7 @@ class [[eosio::contract]] malloc_tests : public contract{
       template<typename T>
       void malloc_align_test() {
          eosio::check((uintptr_t)malloc(sizeof(T)) % alignof(T) == 0, "insufficient alignment");
-         malloc(1);
+         char* ptr = (char*)malloc(1);
          eosio::check((uintptr_t)malloc(sizeof(T)) % alignof(T) == 0, "insufficient alignment");
       }
       [[eosio::action]]
@@ -70,6 +78,6 @@ class [[eosio::contract]] malloc_tests : public contract{
 
       [[eosio::action]]
       void mallocfail() {
-         malloc(max_heap);
+         char* ptr = (char*)malloc(max_heap);
       }
 };

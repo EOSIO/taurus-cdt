@@ -41,8 +41,4 @@ __fixunssfti
 __fixunsdfti
 __trunctfdf2
 __trunctfsf2
-memcpy
-memmove
-memcmp
-memset
 abort

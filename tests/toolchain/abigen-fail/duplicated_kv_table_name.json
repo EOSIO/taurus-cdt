@@ -1,0 +1,11 @@
+{
+    "tests" : [
+      {
+        "compile_flags": ["--contract","hello"],
+        "expected" : {
+          "stderr": "Error: duplicated table name \"testtable\""
+        }
+      }
+    ]
+  }
+  

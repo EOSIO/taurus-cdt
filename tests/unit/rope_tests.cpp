@@ -3,12 +3,10 @@
  *  @copyright defined in eosio.cdt/LICENSE.txt
  */
 
-#include <eosio/eosio.hpp>
+#include "legacy_tester.hpp"
 #include <eosio/rope.hpp>
 #include <eosio/tester.hpp>
 #include <string>
-
-using namespace eosio::native;
 
 EOSIO_TEST_BEGIN(rope_test)
    eosio::rope r("test string 0");
