@@ -1,6 +1,6 @@
 # EOSIO-Taurus CDT (Contract Development Toolkit)
 
-EOSIO-Taurs CDT is a toolchain for WebAssembly (WASM) and a set of tools to facilitate smart contract development for the [EOSIO-Taurus platform](https://github.com/EOSIO/taurus-node). In addition to being a general purpose WebAssembly toolchain, EOSIO-Taurus specific optimizations are available to support building EOSIO-Taurus smart contracts. This EOSIO-Taurus CDT repository is fork from the [eosio.cdt](https://github.com/EOSIO/eosio.cdt) repository.
+EOSIO-Taurus CDT is a toolchain for WebAssembly (WASM) and a set of tools to facilitate smart contract development for the [EOSIO-Taurus platform](https://github.com/EOSIO/taurus-node). In addition to being a general purpose WebAssembly toolchain, EOSIO-Taurus specific optimizations are available to support building EOSIO-Taurus smart contracts. This EOSIO-Taurus CDT repository is fork from the [eosio.cdt](https://github.com/EOSIO/eosio.cdt) repository.
 
 EOSIO-Taurus CDT added features for supporting enterprise application requirements, simplifying smart contract developing, and improving the development efficiency.
 
